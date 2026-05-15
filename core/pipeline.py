@@ -1,3 +1,4 @@
+import os
 import yaml
 import json
 from pathlib import Path
@@ -71,10 +72,15 @@ def run_pipeline(dry_run: bool = False) -> dict:
     max_retries = config["content"]["max_retries"]
     start_time = datetime.now()
 
+    # ── Niche override dari Telegram Bot (via GitHub Actions env) ──
+    niche_override = os.getenv("NICHE_OVERRIDE", "").strip()
+
     print("\n" + "="*55)
     print("🚀 AUTOGRAM PIPELINE DIMULAI")
     print(f"   Mode: {'DRY RUN' if dry_run else 'LIVE'}")
     print(f"   Waktu: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    if niche_override:
+        print(f"   Niche: {niche_override} (dari Telegram)")
     print("="*55)
 
     post_id = None
@@ -84,6 +90,9 @@ def run_pipeline(dry_run: bool = False) -> dict:
         print("\n📍 STEP 1: Trend Research")
         t = datetime.now()
         trend = research_trends()
+        if niche_override:
+            trend["niche"] = niche_override
+            print(f"   ⚡ Niche override: {niche_override}")
         duration = (datetime.now() - t).total_seconds()
         print(f"   ✅ Selesai ({duration:.1f}s)")
 
@@ -146,7 +155,7 @@ def run_pipeline(dry_run: bool = False) -> dict:
                              error_msg="QA gagal 3x")
             reason = f"QA gagal {max_retries}x (score terakhir: {qa_result['overall']:.1f}/10)"
             print(f"\n⚠️  Pipeline dihentikan — {reason}")
-            notify_skip(reason)  # ← NOTIF SKIP
+            notify_skip(reason)
             return {"success": False, "reason": "qa_failed", "post_id": post_id}
 
         # ── STEP 5: POSTING ──
@@ -176,7 +185,6 @@ def run_pipeline(dry_run: bool = False) -> dict:
                 print(f"   URL     : {post_result.get('post_url')}")
             print(f"{'='*55}")
 
-            # ← NOTIF SUCCESS (skip post_url saat dry_run)
             notify_success(
                 niche=content["niche"],
                 topic=content["topic"],
@@ -192,14 +200,14 @@ def run_pipeline(dry_run: bool = False) -> dict:
                         post_result.get("message"))
             msg = post_result.get("message", "unknown error")
             print(f"\n❌ Upload gagal: {msg}")
-            notify_fail(reason=msg, stage="upload")  # ← NOTIF FAIL
+            notify_fail(reason=msg, stage="upload")
             return {"success": False, "reason": "upload_failed", "post_id": post_id}
 
     except Exception as e:
         print(f"\n❌ Pipeline error: {e}")
         if post_id:
             update_post_status(post_id, "failed", error_msg=str(e))
-        notify_fail(reason=str(e), stage="pipeline")  # ← NOTIF FAIL (exception)
+        notify_fail(reason=str(e), stage="pipeline")
         return {"success": False, "reason": str(e)}
 
 if __name__ == "__main__":
