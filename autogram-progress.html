@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AutoGram v2 — Cloud Free Stack</title>
+<title>AutoGram v2 — Cloud Free Stack · Updated</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap');
   :root {
@@ -91,7 +91,7 @@
     height: 100%;
     background: linear-gradient(90deg, var(--accent2), var(--accent));
     border-radius: 3px;
-    width: 70%;
+    width: 90%;
   }
   .progress-phases {
     display: flex;
@@ -307,9 +307,9 @@
 <div class="header">
   <div class="header-top">
     <h1>Auto<span>Gram</span></h1>
-    <div class="version-pill">v2 · CLOUD FREE</div>
+    <div class="version-pill">v2 · DEPLOYED ✓</div>
   </div>
-  <div class="sub">PROGRESS REKAP · 15 MEI 2026</div>
+  <div class="sub">PROGRESS REKAP · 15 MEI 2026 · SESI 2</div>
 </div>
 
 <!-- FORK BANNER -->
@@ -325,7 +325,7 @@
 <div class="progress-wrap">
   <div class="progress-label">
     <span>Overall Progress</span>
-    <span class="pct">70% — Refactor + Deploy</span>
+    <span class="pct">90% — GitHub Actions Live</span>
   </div>
   <div class="progress-bar">
     <div class="progress-fill"></div>
@@ -333,8 +333,9 @@
   <div class="progress-phases">
     <div class="phase phase-done">1 · ENGINES</div>
     <div class="phase phase-done">2 · PIPELINE</div>
-    <div class="phase phase-active">3 · REFACTOR API</div>
-    <div class="phase phase-pending">4 · DEPLOY VM</div>
+    <div class="phase phase-done">3 · DEPLOY CI</div>
+    <div class="phase phase-active">4 · BOT UI</div>
+    <div class="phase phase-pending">5 · GO-LIVE</div>
   </div>
 </div>
 
@@ -346,11 +347,11 @@
   </div>
   <div class="stat">
     <div class="val" style="color:var(--accent2)">2</div>
-    <div class="lbl">FILE DIREFACTOR</div>
+    <div class="lbl">PIPELINE SUKSES</div>
   </div>
   <div class="stat">
-    <div class="val" style="color:var(--accent3)">∞</div>
-    <div class="lbl">UPTIME (VM)</div>
+    <div class="val" style="color:var(--accent3)">8.0</div>
+    <div class="lbl">AVG QA SCORE</div>
   </div>
   <div class="stat">
     <div class="val" style="color:var(--accent)">24/7</div>
@@ -375,7 +376,7 @@
       <div class="stack-row"><span class="lbl">LLM</span><span class="val-new">Groq API (llama3)</span></div>
       <div class="stack-row"><span class="lbl">QA Model</span><span class="val-new">Groq API (mixtral)</span></div>
       <div class="stack-row"><span class="lbl">Image Gen</span><span class="val-new">Pollinations.ai</span></div>
-      <div class="stack-row"><span class="lbl">Server</span><span class="val-new">Oracle Cloud Free VM</span></div>
+      <div class="stack-row"><span class="lbl">Server</span><span class="val-new">GitHub Actions (CI)</span></div>
       <div class="stack-row"><span class="lbl">Biaya</span><span class="val-new">Rp 0 / bulan</span></div>
     </div>
   </div>
@@ -471,7 +472,7 @@
     <div class="item-icon">⏰</div>
     <div class="item-body">
       <div class="item-title">Scheduler — <code>core/scheduler.py</code></div>
-      <div class="item-desc">APScheduler + random interval 44–52 jam. Tidak berubah — tinggal dipindah ke Oracle VM.</div>
+      <div class="item-desc">GitHub Actions cron setiap 2 hari (01:00 UTC). Bisa trigger manual dari GitHub. <code>.github/workflows/autogram.yml</code> sudah live.</div>
     </div>
     <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
   </div>
@@ -489,41 +490,59 @@
     <div class="item-icon">📱</div>
     <div class="item-body">
       <div class="item-title">Warmup Akun @superchronos.ai</div>
-      <div class="item-desc">Hari ke-1 dari 14. 2 post manual sudah ada. Lanjut warmup sambil refactor berjalan.</div>
+      <div class="item-desc">Hari ke-1 dari 14. 2 post manual sudah ada. Pipeline otomatis sudah jalan — dry_run=True selama warmup.</div>
     </div>
     <div class="item-badge"><span class="badge badge-warn">WARMUP</span></div>
   </div>
 </div>
 
-<!-- YANG DIREFACTOR -->
+<!-- SUDAH SELESAI SESI 2 -->
 <div class="section">
-  <h2>🔧 Perlu Direfactor</h2>
+  <h2>✅ Selesai di Sesi 2</h2>
 
   <div class="item">
     <div class="item-icon">✍️</div>
     <div class="item-body">
       <div class="item-title">Content Engine — <code>engines/content_engine.py</code></div>
-      <div class="item-desc">Ganti <code>ollama.generate(model="llama3.1"...)</code> → <code>groq.chat.completions.create(model="llama-3.1-8b-instant"...)</code>. Install <code>pip install groq</code>.</div>
+      <div class="item-desc">Groq <code>llama-3.1-8b-instant</code> berjalan sempurna. Caption + hashtag digenerate otomatis.</div>
     </div>
-    <div class="item-badge"><span class="badge badge-refactor">REFACTOR</span></div>
-  </div>
-
-  <div class="item">
-    <div class="item-icon">🔍</div>
-    <div class="item-body">
-      <div class="item-title">QA Engine — <code>engines/qa_engine.py</code></div>
-      <div class="item-desc">Ganti <code>qwen2.5-coder:14b</code> di Ollama → <code>mixtral-8x7b-32768</code> di Groq. Format response tetap JSON scoring.</div>
-    </div>
-    <div class="item-badge"><span class="badge badge-refactor">REFACTOR</span></div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
   </div>
 
   <div class="item">
     <div class="item-icon">🎨</div>
     <div class="item-body">
       <div class="item-title">Visual Engine — <code>engines/visual_engine.py</code></div>
-      <div class="item-desc">Ganti ComfyUI API → HTTP GET ke <code>https://image.pollinations.ai/prompt/{prompt}?width=1080&height=1080</code>. Tidak butuh API key.</div>
+      <div class="item-desc">Pollinations.ai 1080×1080px. Tanpa API key, tanpa instalasi model.</div>
     </div>
-    <div class="item-badge"><span class="badge badge-refactor">REFACTOR</span></div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔍</div>
+    <div class="item-body">
+      <div class="item-title">QA Engine — <code>engines/qa_engine.py</code></div>
+      <div class="item-desc">Groq <code>llama-3.3-70b-versatile</code>. QA score 8.0/10 konsisten.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔗</div>
+    <div class="item-body">
+      <div class="item-title">Integrasi Notifier ke Pipeline</div>
+      <div class="item-desc">notify_success / notify_fail / notify_skip sudah terpasang di <code>core/pipeline.py</code>. Tertest.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">⚙️</div>
+    <div class="item-body">
+      <div class="item-title">GitHub Actions — <code>.github/workflows/autogram.yml</code></div>
+      <div class="item-desc">Cron setiap 2 hari + manual trigger. Pipeline #2 sukses: 2m 25s, QA 8.0/10, notif Telegram masuk.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
   </div>
 </div>
 
@@ -532,66 +551,30 @@
   <h2>⬜ Selanjutnya</h2>
 
   <div class="item">
-    <div class="item-icon">🔑</div>
+    <div class="item-icon">🤖</div>
     <div class="item-body">
-      <div class="item-title">Daftar & Ambil Groq API Key</div>
-      <div class="item-desc">Daftar di <code>console.groq.com</code> → buat API key → tambahkan <code>GROQ_API_KEY=...</code> ke .env</div>
+      <div class="item-title">Telegram Bot UI — <code>core/bot.py</code></div>
+      <div class="item-desc">Control panel via Telegram: /run, /post [niche], /status, /history. User bisa pilih niche sebelum AI research.</div>
     </div>
     <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
   </div>
 
   <div class="item">
-    <div class="item-icon">🔧</div>
+    <div class="item-icon">📊</div>
     <div class="item-body">
-      <div class="item-title">Refactor 3 Engine (content, qa, visual)</div>
-      <div class="item-desc">~30 menit kerja. Groq SDK mirip OpenAI, mudah dimigrasi. Pollinations cukup satu baris <code>requests.get()</code>.</div>
+      <div class="item-title">Web Dashboard (Opsional)</div>
+      <div class="item-desc">UI monitoring di Vercel. Bisa dibangun setelah Telegram Bot stabil. Telegram Bot tetap jalan paralel.</div>
     </div>
-    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
-  </div>
-
-  <div class="item">
-    <div class="item-icon">🔗</div>
-    <div class="item-body">
-      <div class="item-title">Integrasi Notifier ke Pipeline</div>
-      <div class="item-desc">Tambahkan <code>notify_success()</code> / <code>notify_fail()</code> di <code>core/pipeline.py</code>.</div>
-    </div>
-    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
-  </div>
-
-  <div class="item">
-    <div class="item-icon">☁️</div>
-    <div class="item-body">
-      <div class="item-title">Setup Oracle Cloud Free VM</div>
-      <div class="item-desc">Daftar Oracle Cloud → buat VM ARM (Always Free) → install Python, clone repo, setup systemd service untuk auto-restart.</div>
-    </div>
-    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
-  </div>
-
-  <div class="item">
-    <div class="item-icon">🧪</div>
-    <div class="item-body">
-      <div class="item-title">Test Full Pipeline di VM (dry_run=True)</div>
-      <div class="item-desc">Jalankan pipeline dari VM, pastikan semua API call berhasil, Telegram notif masuk, log ke DB berjalan.</div>
-    </div>
-    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
+    <div class="item-badge"><span class="badge badge-skip">OPTIONAL</span></div>
   </div>
 
   <div class="item">
     <div class="item-icon">🚀</div>
     <div class="item-body">
       <div class="item-title">Go-Live — <code>dry_run=False</code></div>
-      <div class="item-desc">Setelah 2 minggu warmup (sekitar 29 Mei), ubah baris 47 di <code>core/scheduler.py</code> menjadi <code>dry_run=False</code>. Sistem live dari Oracle VM.</div>
+      <div class="item-desc">Setelah 2 minggu warmup (~29 Mei), ubah <code>dry_run=True</code> → <code>dry_run=False</code> di <code>core/pipeline.py</code> baris 206 dan push ke GitHub.</div>
     </div>
-    <div class="item-badge"><span class="badge badge-skip">LATER</span></div>
-  </div>
-
-  <div class="item">
-    <div class="item-icon">📊</div>
-    <div class="item-body">
-      <div class="item-title">Dashboard Next.js (Opsional)</div>
-      <div class="item-desc">UI monitoring post history dan pipeline log. Bisa dibangun setelah sistem live dan stabil.</div>
-    </div>
-    <div class="item-badge"><span class="badge badge-skip">OPTIONAL</span></div>
+    <div class="item-badge"><span class="badge badge-skip">29 MEI</span></div>
   </div>
 </div>
 
@@ -626,19 +609,19 @@
 <div class="section">
   <h2>📌 Catatan Penting</h2>
 
-  <div class="note note-warn">
-    ⚠️ <strong>ComfyUI + SDXL tidak lagi diperlukan.</strong><br>
-    Tidak perlu download model 6.5GB. Pollinations.ai mengenerate gambar dari cloud, gratis, tanpa instalasi apapun.
-  </div>
-
   <div class="note note-ok">
-    ✅ <strong>Cara jalankan di VM (setelah deploy):</strong><br>
-    Cukup SSH ke Oracle VM sekali untuk setup. Setelah itu sistem berjalan sendiri via systemd. PC boleh mati kapanpun.
+    ✅ <strong>Pipeline sudah live di GitHub Actions!</strong><br>
+    Jalan otomatis setiap 2 hari. Trigger manual kapanpun dari <code>github.com/himawaninsta01/autogram/actions</code>.
   </div>
 
   <div class="note note-info">
-    💡 <strong>Satu-satunya perubahan saat go-live tetap sama:</strong><br>
-    Buka <code>core/scheduler.py</code> baris 47, ubah <code>dry_run=True</code> → <code>dry_run=False</code> dari terminal Oracle VM.
+    💡 <strong>Go-live ~29 Mei:</strong><br>
+    Edit <code>core/pipeline.py</code> baris 206 → ubah <code>dry_run=True</code> menjadi <code>dry_run=False</code> → push ke GitHub. Selesai.
+  </div>
+
+  <div class="note note-warn">
+    ⚠️ <strong>Selanjutnya: Telegram Bot UI</strong><br>
+    Tambah <code>core/bot.py</code> untuk kontrol niche via Telegram. User bisa ketik /post AI atau /post crypto sebelum pipeline jalan.
   </div>
 </div>
 
