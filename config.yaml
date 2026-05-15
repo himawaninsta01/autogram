@@ -1,0 +1,51 @@
+# AutoGram Configuration
+
+niche:
+  list:
+    - teknologi
+    - AI
+    - tips produktivitas
+    - desain
+    - bisnis online
+  min_trend_score: 40      # Skor minimum sebelum AI suggest niche baru
+  fallback_to_ai: true     # Aktifkan AI suggest jika semua niche di bawah threshold
+
+scheduler:
+  interval_hours_min: 44   # Minimum interval antar post
+  interval_hours_max: 52   # Maximum interval antar post
+  engagement_windows:      # Jam posting yang diperbolehkan (WIB)
+    - [7, 9]
+    - [11, 13]
+    - [19, 22]
+
+content:
+  language: id
+  caption_max_chars: 300
+  hashtag_count: 20
+  llm_model: llama-3.1-8b-instant
+  qa_model: llama-3.3-70b-versatile
+  qa_threshold: 7.0 
+  max_retries: 3
+
+image:
+  width: 1080
+  height: 1080
+  comfyui_url: "http://localhost:8188"
+  style_map:
+    teknologi: "futuristic digital art, clean minimalist"
+    AI: "neural network visualization, tech aesthetic"
+    tips produktivitas: "clean infographic style, flat design"
+    desain: "creative abstract, colorful geometric"
+    bisnis online: "professional business illustration"
+
+posting:
+  pre_upload_delay_min: 30   # detik
+  pre_upload_delay_max: 120
+  retry_on_fail: 3
+
+notifications:
+  telegram_enabled: true
+  notify_on_success: true
+  notify_on_fail: true
+  notify_on_skip: true
+  

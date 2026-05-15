@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoGram v2 — Cloud Free Stack</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap');
+  :root {
+    --bg: #0c0e0f;
+    --surface: #141618;
+    --surface2: #1c1f21;
+    --border: #272b2e;
+    --accent: #00e5a0;
+    --accent2: #00b4ff;
+    --accent3: #ffb800;
+    --accent4: #ff5f7e;
+    --text: #dde2e6;
+    --muted: #5a6370;
+    --ok: #00e5a0;
+    --warn: #ffb800;
+    --danger: #ff5f7e;
+    --next: #00b4ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cabinet Grotesk', sans-serif;
+    padding: 48px 28px;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .header { margin-bottom: 40px; }
+  .header-top { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 6px; }
+  h1 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+  h1 span { color: var(--accent); }
+  .version-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    background: rgba(0,229,160,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,160,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    margin-bottom: 4px;
+  }
+  .sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  /* FORK BANNER */
+  .fork-banner {
+    background: var(--surface);
+    border: 1px solid rgba(0,180,255,0.25);
+    border-left: 3px solid var(--accent2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .fork-icon { font-size: 22px; flex-shrink: 0; }
+  .fork-body { font-size: 13px; line-height: 1.7; color: #7aaecc; }
+  .fork-body strong { color: var(--accent2); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 32px;
+  }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }
+  .progress-label .pct { font-weight: 700; color: var(--ok); font-family: 'IBM Plex Mono', monospace; }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 3px;
+    width: 70%;
+  }
+  .progress-phases {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .phase {
+    flex: 1;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+  }
+  .phase-done { background: rgba(0,229,160,0.1); color: var(--ok); border: 1px solid rgba(0,229,160,0.2); }
+  .phase-active { background: rgba(0,180,255,0.15); color: var(--accent2); border: 1px solid rgba(0,180,255,0.3); }
+  .phase-pending { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 12px;
+    text-align: center;
+  }
+  .stat .val {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat .lbl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* STACK COMPARISON */
+  .stack-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stack-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stack-box.old { border-top: 2px solid var(--muted); }
+  .stack-box.new { border-top: 2px solid var(--accent); }
+  .stack-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+  }
+  .stack-title.old { color: var(--muted); }
+  .stack-title.new { color: var(--accent); }
+  .stack-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .stack-row:last-child { border-bottom: none; }
+  .stack-row .lbl { color: var(--muted); }
+  .stack-row .val-old { color: #888; text-decoration: line-through; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+  .stack-row .val-new { color: var(--accent); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
+
+  h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 32px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .section { margin-bottom: 32px; }
+
+  /* ITEMS */
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .item-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .item-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .item-badge { margin-left: auto; flex-shrink: 0; padding-left: 12px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .badge-ok { background: rgba(0,229,160,0.12); color: var(--ok); border: 1px solid rgba(0,229,160,0.25); }
+  .badge-warn { background: rgba(255,184,0,0.12); color: var(--warn); border: 1px solid rgba(255,184,0,0.25); }
+  .badge-next { background: rgba(0,180,255,0.12); color: var(--accent2); border: 1px solid rgba(0,180,255,0.25); }
+  .badge-skip { background: rgba(90,99,112,0.12); color: var(--muted); border: 1px solid rgba(90,99,112,0.2); }
+  .badge-new { background: rgba(255,184,0,0.12); color: var(--accent3); border: 1px solid rgba(255,184,0,0.25); }
+  .badge-refactor { background: rgba(255,95,126,0.1); color: var(--accent4); border: 1px solid rgba(255,95,126,0.2); }
+
+  /* FILE TREE */
+  .tree {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 2;
+    color: #5a6370;
+  }
+  .tree .folder { color: var(--accent3); }
+  .tree .file-py { color: var(--accent); }
+  .tree .file-cfg { color: var(--accent2); }
+  .tree .file-env { color: var(--accent4); }
+  .tree .done::after { content: ' ✓'; color: var(--ok); }
+  .tree .partial::after { content: ' ~'; color: var(--warn); }
+  .tree .changed { color: var(--accent4); }
+  .tree .changed::after { content: ' ← direfactor'; color: var(--accent4); font-size: 10px; opacity: 0.7; }
+
+  /* NOTES */
+  .note {
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 12px 0;
+  }
+  .note-info { background: rgba(0,180,255,0.07); border: 1px solid rgba(0,180,255,0.2); color: #7aaecc; }
+  .note-warn { background: rgba(255,184,0,0.07); border: 1px solid rgba(255,184,0,0.2); color: #c49a40; }
+  .note-ok { background: rgba(0,229,160,0.07); border: 1px solid rgba(0,229,160,0.2); color: #3daa7a; }
+
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: var(--surface2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  /* FREE COST TABLE */
+  .cost-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0 16px;
+  }
+  .cost-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cost-table td {
+    padding: 9px 12px 9px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+  }
+  .cost-table tr:last-child td { border-bottom: none; }
+  .free-pill {
+    background: rgba(0,229,160,0.1);
+    color: var(--ok);
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .limit-pill {
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>Auto<span>Gram</span></h1>
+    <div class="version-pill">v2 · CLOUD FREE</div>
+  </div>
+  <div class="sub">PROGRESS REKAP · 15 MEI 2026</div>
+</div>
+
+<!-- FORK BANNER -->
+<div class="fork-banner">
+  <div class="fork-icon">⑂</div>
+  <div class="fork-body">
+    <strong>Fork dari v1 (lokal) → v2 (cloud gratis)</strong><br>
+    Semua logika pipeline tetap sama. Yang berubah hanya layer AI dan infrastruktur: Ollama + ComfyUI lokal diganti ke <strong>Groq API + Pollinations.ai</strong>, dan scheduler dipindah ke <strong>Oracle Cloud Free VM</strong>. PC tidak perlu menyala lagi.
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span>Overall Progress</span>
+    <span class="pct">70% — Refactor + Deploy</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill"></div>
+  </div>
+  <div class="progress-phases">
+    <div class="phase phase-done">1 · ENGINES</div>
+    <div class="phase phase-done">2 · PIPELINE</div>
+    <div class="phase phase-active">3 · REFACTOR API</div>
+    <div class="phase phase-pending">4 · DEPLOY VM</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="val" style="color:var(--ok)">0</div>
+    <div class="lbl">BIAYA / BULAN</div>
+  </div>
+  <div class="stat">
+    <div class="val" style="color:var(--accent2)">2</div>
+    <div class="lbl">FILE DIREFACTOR</div>
+  </div>
+  <div class="stat">
+    <div class="val" style="color:var(--accent3)">∞</div>
+    <div class="lbl">UPTIME (VM)</div>
+  </div>
+  <div class="stat">
+    <div class="val" style="color:var(--accent)">24/7</div>
+    <div class="lbl">PC BEBAS MATI</div>
+  </div>
+</div>
+
+<!-- STACK COMPARISON -->
+<div class="section">
+  <h2>🔀 Perubahan Stack</h2>
+  <div class="stack-compare">
+    <div class="stack-box old">
+      <div class="stack-title old">v1 · LOKAL</div>
+      <div class="stack-row"><span class="lbl">LLM</span><span class="val-old">Ollama llama3.1</span></div>
+      <div class="stack-row"><span class="lbl">QA Model</span><span class="val-old">qwen2.5-coder:14b</span></div>
+      <div class="stack-row"><span class="lbl">Image Gen</span><span class="val-old">ComfyUI + SDXL</span></div>
+      <div class="stack-row"><span class="lbl">Server</span><span class="val-old">PC harus nyala</span></div>
+      <div class="stack-row"><span class="lbl">Biaya</span><span class="val-old">Listrik + HDD</span></div>
+    </div>
+    <div class="stack-box new">
+      <div class="stack-title new">v2 · CLOUD GRATIS</div>
+      <div class="stack-row"><span class="lbl">LLM</span><span class="val-new">Groq API (llama3)</span></div>
+      <div class="stack-row"><span class="lbl">QA Model</span><span class="val-new">Groq API (mixtral)</span></div>
+      <div class="stack-row"><span class="lbl">Image Gen</span><span class="val-new">Pollinations.ai</span></div>
+      <div class="stack-row"><span class="lbl">Server</span><span class="val-new">Oracle Cloud Free VM</span></div>
+      <div class="stack-row"><span class="lbl">Biaya</span><span class="val-new">Rp 0 / bulan</span></div>
+    </div>
+  </div>
+
+  <table class="cost-table">
+    <thead>
+      <tr>
+        <th>LAYANAN</th>
+        <th>DIGUNAKAN UNTUK</th>
+        <th>LIMIT GRATIS</th>
+        <th>STATUS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Groq API</strong></td>
+        <td>Caption + QA scoring</td>
+        <td><span class="limit-pill">~14.400 req/hari</span></td>
+        <td><span class="free-pill">GRATIS</span></td>
+      </tr>
+      <tr>
+        <td><strong>Pollinations.ai</strong></td>
+        <td>Image 1080×1080px</td>
+        <td><span class="limit-pill">Unlimited, no key</span></td>
+        <td><span class="free-pill">GRATIS</span></td>
+      </tr>
+      <tr>
+        <td><strong>Oracle Cloud VM</strong></td>
+        <td>Jalankan scheduler 24/7</td>
+        <td><span class="limit-pill">ARM 4c/24GB, forever</span></td>
+        <td><span class="free-pill">GRATIS</span></td>
+      </tr>
+      <tr>
+        <td><strong>Telegram Bot</strong></td>
+        <td>Notifikasi</td>
+        <td><span class="limit-pill">Unlimited</span></td>
+        <td><span class="free-pill">GRATIS</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SUDAH SELESAI (v1 carried over) -->
+<div class="section">
+  <h2>✅ Selesai & Dipertahankan dari v1</h2>
+
+  <div class="item">
+    <div class="item-icon">🏗️</div>
+    <div class="item-body">
+      <div class="item-title">Project Structure & Environment</div>
+      <div class="item-desc">Folder, Python 3.13 venv, .gitignore, config.yaml. Tambahkan <code>GROQ_API_KEY</code> ke .env.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🗄️</div>
+    <div class="item-body">
+      <div class="item-title">Database — <code>core/database.py</code></div>
+      <div class="item-desc">Tidak ada perubahan. SQLite 4 tabel tetap dipakai.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔍</div>
+    <div class="item-body">
+      <div class="item-title">Trend Engine — <code>engines/trend_engine.py</code></div>
+      <div class="item-desc">Tidak ada perubahan. Google Trends scraping tidak pakai LLM lokal.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">📤</div>
+    <div class="item-body">
+      <div class="item-title">Post Engine — <code>engines/post_engine.py</code></div>
+      <div class="item-desc">Tidak ada perubahan. instagrapi + session + dry_run logic tetap sama.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔄</div>
+    <div class="item-body">
+      <div class="item-title">Pipeline Orchestrator — <code>core/pipeline.py</code></div>
+      <div class="item-desc">Logic flow tidak berubah. Hanya dependency ke engine yang direfactor.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">⏰</div>
+    <div class="item-body">
+      <div class="item-title">Scheduler — <code>core/scheduler.py</code></div>
+      <div class="item-desc">APScheduler + random interval 44–52 jam. Tidak berubah — tinggal dipindah ke Oracle VM.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">📬</div>
+    <div class="item-body">
+      <div class="item-title">Telegram Notifier — <code>core/notifier.py</code></div>
+      <div class="item-desc">Bot @autogram_superchronos_bot aktif dan sudah tertest.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">📱</div>
+    <div class="item-body">
+      <div class="item-title">Warmup Akun @superchronos.ai</div>
+      <div class="item-desc">Hari ke-1 dari 14. 2 post manual sudah ada. Lanjut warmup sambil refactor berjalan.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-warn">WARMUP</span></div>
+  </div>
+</div>
+
+<!-- YANG DIREFACTOR -->
+<div class="section">
+  <h2>🔧 Perlu Direfactor</h2>
+
+  <div class="item">
+    <div class="item-icon">✍️</div>
+    <div class="item-body">
+      <div class="item-title">Content Engine — <code>engines/content_engine.py</code></div>
+      <div class="item-desc">Ganti <code>ollama.generate(model="llama3.1"...)</code> → <code>groq.chat.completions.create(model="llama-3.1-8b-instant"...)</code>. Install <code>pip install groq</code>.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-refactor">REFACTOR</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔍</div>
+    <div class="item-body">
+      <div class="item-title">QA Engine — <code>engines/qa_engine.py</code></div>
+      <div class="item-desc">Ganti <code>qwen2.5-coder:14b</code> di Ollama → <code>mixtral-8x7b-32768</code> di Groq. Format response tetap JSON scoring.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-refactor">REFACTOR</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🎨</div>
+    <div class="item-body">
+      <div class="item-title">Visual Engine — <code>engines/visual_engine.py</code></div>
+      <div class="item-desc">Ganti ComfyUI API → HTTP GET ke <code>https://image.pollinations.ai/prompt/{prompt}?width=1080&height=1080</code>. Tidak butuh API key.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-refactor">REFACTOR</span></div>
+  </div>
+</div>
+
+<!-- SELANJUTNYA -->
+<div class="section">
+  <h2>⬜ Selanjutnya</h2>
+
+  <div class="item">
+    <div class="item-icon">🔑</div>
+    <div class="item-body">
+      <div class="item-title">Daftar & Ambil Groq API Key</div>
+      <div class="item-desc">Daftar di <code>console.groq.com</code> → buat API key → tambahkan <code>GROQ_API_KEY=...</code> ke .env</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔧</div>
+    <div class="item-body">
+      <div class="item-title">Refactor 3 Engine (content, qa, visual)</div>
+      <div class="item-desc">~30 menit kerja. Groq SDK mirip OpenAI, mudah dimigrasi. Pollinations cukup satu baris <code>requests.get()</code>.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔗</div>
+    <div class="item-body">
+      <div class="item-title">Integrasi Notifier ke Pipeline</div>
+      <div class="item-desc">Tambahkan <code>notify_success()</code> / <code>notify_fail()</code> di <code>core/pipeline.py</code>.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">☁️</div>
+    <div class="item-body">
+      <div class="item-title">Setup Oracle Cloud Free VM</div>
+      <div class="item-desc">Daftar Oracle Cloud → buat VM ARM (Always Free) → install Python, clone repo, setup systemd service untuk auto-restart.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🧪</div>
+    <div class="item-body">
+      <div class="item-title">Test Full Pipeline di VM (dry_run=True)</div>
+      <div class="item-desc">Jalankan pipeline dari VM, pastikan semua API call berhasil, Telegram notif masuk, log ke DB berjalan.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🚀</div>
+    <div class="item-body">
+      <div class="item-title">Go-Live — <code>dry_run=False</code></div>
+      <div class="item-desc">Setelah 2 minggu warmup (sekitar 29 Mei), ubah baris 47 di <code>core/scheduler.py</code> menjadi <code>dry_run=False</code>. Sistem live dari Oracle VM.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-skip">LATER</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">📊</div>
+    <div class="item-body">
+      <div class="item-title">Dashboard Next.js (Opsional)</div>
+      <div class="item-desc">UI monitoring post history dan pipeline log. Bisa dibangun setelah sistem live dan stabil.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-skip">OPTIONAL</span></div>
+  </div>
+</div>
+
+<!-- FILE STRUCTURE -->
+<div class="section">
+  <h2>📁 Struktur File</h2>
+  <div class="tree">
+    <span class="folder">autogram/</span><br>
+    &nbsp;&nbsp;<span class="folder">├── core/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py done">├── database.py</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py done">├── pipeline.py</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py done">├── scheduler.py</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py done">└── notifier.py</span><br>
+    &nbsp;&nbsp;<span class="folder">├── engines/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py done">├── trend_engine.py</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py changed">├── content_engine.py</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py changed">├── visual_engine.py</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py changed">├── qa_engine.py</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-py done">└── post_engine.py</span><br>
+    &nbsp;&nbsp;<span class="folder">├── data/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="done">└── autogram.db</span><br>
+    &nbsp;&nbsp;<span class="file-cfg done">├── config.yaml</span><br>
+    &nbsp;&nbsp;<span class="file-env done">└── .env</span> <span style="color:var(--accent4); font-size:11px;">← tambah GROQ_API_KEY</span><br>
+    <br>
+    <span class="folder" style="color:var(--accent2)">oracle-vm/</span> <span style="color:var(--muted)">(belum disetup)</span><br>
+    &nbsp;&nbsp;<span style="color:var(--muted)">├── autogram/</span> <span style="color:var(--muted); font-size:11px;">← clone repo ke sini</span><br>
+    &nbsp;&nbsp;<span style="color:var(--muted)">└── autogram.service</span> <span style="color:var(--muted); font-size:11px;">← systemd service</span>
+  </div>
+</div>
+
+<!-- CATATAN -->
+<div class="section">
+  <h2>📌 Catatan Penting</h2>
+
+  <div class="note note-warn">
+    ⚠️ <strong>ComfyUI + SDXL tidak lagi diperlukan.</strong><br>
+    Tidak perlu download model 6.5GB. Pollinations.ai mengenerate gambar dari cloud, gratis, tanpa instalasi apapun.
+  </div>
+
+  <div class="note note-ok">
+    ✅ <strong>Cara jalankan di VM (setelah deploy):</strong><br>
+    Cukup SSH ke Oracle VM sekali untuk setup. Setelah itu sistem berjalan sendiri via systemd. PC boleh mati kapanpun.
+  </div>
+
+  <div class="note note-info">
+    💡 <strong>Satu-satunya perubahan saat go-live tetap sama:</strong><br>
+    Buka <code>core/scheduler.py</code> baris 47, ubah <code>dry_run=True</code> → <code>dry_run=False</code> dari terminal Oracle VM.
+  </div>
+</div>
+
+</body>
+</html>

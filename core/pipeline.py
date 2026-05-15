@@ -1,0 +1,207 @@
+import yaml
+import json
+from pathlib import Path
+from datetime import datetime
+from core.database import get_connection, init_db
+from core.notifier import notify_success, notify_fail, notify_skip
+from engines.trend_engine import research_trends
+from engines.content_engine import run_content_engine
+from engines.visual_engine import generate_image
+from engines.post_engine import upload_post
+from engines.qa_engine import run_qa
+
+CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
+
+def load_config():
+    with open(CONFIG_PATH) as f:
+        return yaml.safe_load(f)
+
+def log_pipeline(post_id: int, stage: str, status: str,
+                 duration: float = 0, message: str = ""):
+    conn = get_connection()
+    conn.execute("""
+        INSERT INTO pipeline_logs (post_id, stage, status, duration_s, message)
+        VALUES (?, ?, ?, ?, ?)
+    """, (post_id, stage, status, duration, message))
+    conn.commit()
+    conn.close()
+
+def save_post_draft(data: dict) -> int:
+    """Simpan draft post ke database, return post_id."""
+    conn = get_connection()
+    cursor = conn.execute("""
+        INSERT INTO posts (niche, topic, trend_score, caption, hashtags,
+                          image_path, image_prompt, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
+    """, (
+        data["niche"], data["topic"], data.get("trend_score", 0),
+        data["caption"], json.dumps(data["hashtags"]),
+        data.get("image_path", ""), data.get("image_prompt", "")
+    ))
+    conn.commit()
+    post_id = cursor.lastrowid
+    conn.close()
+    return post_id
+
+def update_post_status(post_id: int, status: str,
+                       qa_score: float = None, ig_post_id: str = None,
+                       error_msg: str = None):
+    conn = get_connection()
+    now = datetime.now()
+    if status == "posted":
+        conn.execute("""
+            UPDATE posts SET status=?, qa_score=?, ig_post_id=?, posted_at=?
+            WHERE id=?
+        """, (status, qa_score, ig_post_id, now, post_id))
+    else:
+        conn.execute("""
+            UPDATE posts SET status=?, qa_score=?, error_msg=?
+            WHERE id=?
+        """, (status, qa_score, error_msg, post_id))
+    conn.commit()
+    conn.close()
+
+def run_pipeline(dry_run: bool = False) -> dict:
+    """
+    Jalankan full pipeline dari trend hingga posting.
+    dry_run=True: simulasi tanpa posting ke Instagram.
+    """
+    init_db()
+    config = load_config()
+    max_retries = config["content"]["max_retries"]
+    start_time = datetime.now()
+
+    print("\n" + "="*55)
+    print("🚀 AUTOGRAM PIPELINE DIMULAI")
+    print(f"   Mode: {'DRY RUN' if dry_run else 'LIVE'}")
+    print(f"   Waktu: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print("="*55)
+
+    post_id = None
+
+    try:
+        # ── STEP 1: TREND RESEARCH ──
+        print("\n📍 STEP 1: Trend Research")
+        t = datetime.now()
+        trend = research_trends()
+        duration = (datetime.now() - t).total_seconds()
+        print(f"   ✅ Selesai ({duration:.1f}s)")
+
+        # ── STEP 2: CONTENT GENERATION ──
+        print("\n📍 STEP 2: Content Generation")
+        t = datetime.now()
+        content = run_content_engine(trend["niche"], trend["topic"])
+        content["trend_score"] = trend["score"]
+        duration = (datetime.now() - t).total_seconds()
+        print(f"   ✅ Selesai ({duration:.1f}s)")
+
+        # Simpan draft awal
+        post_id = save_post_draft(content)
+        print(f"   💾 Draft disimpan (ID: {post_id})")
+        log_pipeline(post_id, "content", "success", duration)
+
+        # ── STEP 3: IMAGE GENERATION ──
+        print("\n📍 STEP 3: Image Generation")
+        t = datetime.now()
+        image_path = generate_image(
+            content["image_prompt"],
+            content["niche"],
+            content["topic"]
+        )
+        content["image_path"] = image_path
+        duration = (datetime.now() - t).total_seconds()
+        print(f"   ✅ Selesai ({duration:.1f}s)")
+        log_pipeline(post_id, "visual", "success", duration)
+
+        # ── STEP 4: QA ENGINE (dengan retry) ──
+        print("\n📍 STEP 4: QA Check")
+        qa_result = None
+        for attempt in range(1, max_retries + 1):
+            print(f"   Attempt {attempt}/{max_retries}...")
+            t = datetime.now()
+            qa_result = run_qa(
+                content["niche"], content["topic"],
+                content["caption"], content["hashtags"],
+                content["image_prompt"], image_path
+            )
+            duration = (datetime.now() - t).total_seconds()
+
+            if qa_result["passed"]:
+                print(f"   ✅ QA PASS (score: {qa_result['overall']:.1f})")
+                log_pipeline(post_id, "qa", "pass", duration,
+                           f"score={qa_result['overall']}")
+                break
+            else:
+                print(f"   ❌ QA FAIL (score: {qa_result['overall']:.1f})")
+                log_pipeline(post_id, "qa", "fail", duration,
+                           f"score={qa_result['overall']}")
+                if attempt < max_retries:
+                    print(f"   🔄 Regenerate konten...")
+                    content = run_content_engine(trend["niche"], trend["topic"])
+                    content["trend_score"] = trend["score"]
+                    content["image_path"] = image_path
+
+        if not qa_result or not qa_result["passed"]:
+            update_post_status(post_id, "skipped", qa_result["overall"],
+                             error_msg="QA gagal 3x")
+            reason = f"QA gagal {max_retries}x (score terakhir: {qa_result['overall']:.1f}/10)"
+            print(f"\n⚠️  Pipeline dihentikan — {reason}")
+            notify_skip(reason)  # ← NOTIF SKIP
+            return {"success": False, "reason": "qa_failed", "post_id": post_id}
+
+        # ── STEP 5: POSTING ──
+        print(f"\n📍 STEP 5: Upload ke Instagram")
+        t = datetime.now()
+        post_result = upload_post(
+            image_path,
+            content["caption"],
+            content["hashtags"],
+            dry_run=dry_run
+        )
+        duration = (datetime.now() - t).total_seconds()
+
+        if post_result["success"]:
+            update_post_status(
+                post_id, "posted",
+                qa_score=qa_result["overall"],
+                ig_post_id=post_result.get("post_id")
+            )
+            log_pipeline(post_id, "post", "success", duration)
+            total = (datetime.now() - start_time).total_seconds()
+            print(f"\n{'='*55}")
+            print(f"✅ PIPELINE SELESAI — {total:.0f} detik")
+            print(f"   Post ID : {post_result.get('post_id')}")
+            print(f"   QA Score: {qa_result['overall']:.1f}/10")
+            if not dry_run:
+                print(f"   URL     : {post_result.get('post_url')}")
+            print(f"{'='*55}")
+
+            # ← NOTIF SUCCESS (skip post_url saat dry_run)
+            notify_success(
+                niche=content["niche"],
+                topic=content["topic"],
+                qa_score=qa_result["overall"],
+                post_url=post_result.get("post_url") if not dry_run else None
+            )
+
+            return {"success": True, "post_id": post_id, "result": post_result}
+        else:
+            update_post_status(post_id, "failed",
+                             error_msg=post_result.get("message"))
+            log_pipeline(post_id, "post", "fail", duration,
+                        post_result.get("message"))
+            msg = post_result.get("message", "unknown error")
+            print(f"\n❌ Upload gagal: {msg}")
+            notify_fail(reason=msg, stage="upload")  # ← NOTIF FAIL
+            return {"success": False, "reason": "upload_failed", "post_id": post_id}
+
+    except Exception as e:
+        print(f"\n❌ Pipeline error: {e}")
+        if post_id:
+            update_post_status(post_id, "failed", error_msg=str(e))
+        notify_fail(reason=str(e), stage="pipeline")  # ← NOTIF FAIL (exception)
+        return {"success": False, "reason": str(e)}
+
+if __name__ == "__main__":
+    result = run_pipeline(dry_run=True)
+    print(f"\n🎯 Final result: {result}")
