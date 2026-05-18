@@ -211,5 +211,5 @@ def run_pipeline(dry_run: bool = False) -> dict:
         return {"success": False, "reason": str(e)}
 
 if __name__ == "__main__":
-    result = run_pipeline(dry_run=false)
+    result = run_pipeline(dry_run=False)
     print(f"\n🎯 Final result: {result}")
