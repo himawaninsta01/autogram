@@ -34,5 +34,6 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           IG_USERNAME: ${{ secrets.IG_USERNAME }}
           IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
+          IG_SESSION: ${{ secrets.IG_SESSION }}
           NICHE_OVERRIDE: ${{ github.event.client_payload.niche }}
         run: python -m core.pipeline
