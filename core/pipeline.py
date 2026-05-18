@@ -193,7 +193,7 @@ def run_pipeline(dry_run: bool = False) -> dict:
             )
 
             return {"success": True, "post_id": post_id, "result": post_result}
-        else:
+        else:    
             update_post_status(post_id, "failed",
                              error_msg=post_result.get("message"))
             log_pipeline(post_id, "post", "fail", duration,
@@ -211,5 +211,5 @@ def run_pipeline(dry_run: bool = False) -> dict:
         return {"success": False, "reason": str(e)}
 
 if __name__ == "__main__":
-    result = run_pipeline(dry_run=True)
+    result = run_pipeline(dry_run=false)
     print(f"\n🎯 Final result: {result}")
