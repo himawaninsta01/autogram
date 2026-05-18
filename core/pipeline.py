@@ -28,7 +28,6 @@ def log_pipeline(post_id: int, stage: str, status: str,
     conn.close()
 
 def save_post_draft(data: dict) -> int:
-    """Simpan draft post ke database, return post_id."""
     conn = get_connection()
     cursor = conn.execute("""
         INSERT INTO posts (niche, topic, trend_score, caption, hashtags,
@@ -63,16 +62,11 @@ def update_post_status(post_id: int, status: str,
     conn.close()
 
 def run_pipeline(dry_run: bool = False) -> dict:
-    """
-    Jalankan full pipeline dari trend hingga posting.
-    dry_run=True: simulasi tanpa posting ke Instagram.
-    """
     init_db()
     config = load_config()
     max_retries = config["content"]["max_retries"]
     start_time = datetime.now()
 
-    # ── Niche override dari Telegram Bot (via GitHub Actions env) ──
     niche_override = os.getenv("NICHE_OVERRIDE", "").strip()
 
     print("\n" + "="*55)
@@ -104,7 +98,6 @@ def run_pipeline(dry_run: bool = False) -> dict:
         duration = (datetime.now() - t).total_seconds()
         print(f"   ✅ Selesai ({duration:.1f}s)")
 
-        # Simpan draft awal
         post_id = save_post_draft(content)
         print(f"   💾 Draft disimpan (ID: {post_id})")
         log_pipeline(post_id, "content", "success", duration)
@@ -115,15 +108,15 @@ def run_pipeline(dry_run: bool = False) -> dict:
         image_path = generate_image(
             content["image_prompt"],
             content["niche"],
-            content["topic"]
-            brief=content.get("brief", "")
+            content["topic"],
+            brief=content.get("brief", "")  # ← kirim brief untuk infografis
         )
         content["image_path"] = image_path
         duration = (datetime.now() - t).total_seconds()
         print(f"   ✅ Selesai ({duration:.1f}s)")
         log_pipeline(post_id, "visual", "success", duration)
 
-        # ── STEP 4: QA ENGINE (dengan retry) ──
+        # ── STEP 4: QA ENGINE ──
         print("\n📍 STEP 4: QA Check")
         qa_result = None
         for attempt in range(1, max_retries + 1):
@@ -192,9 +185,9 @@ def run_pipeline(dry_run: bool = False) -> dict:
                 qa_score=qa_result["overall"],
                 post_url=post_result.get("post_url") if not dry_run else None
             )
-
             return {"success": True, "post_id": post_id, "result": post_result}
-        else:    
+
+        else:
             update_post_status(post_id, "failed",
                              error_msg=post_result.get("message"))
             log_pipeline(post_id, "post", "fail", duration,
@@ -212,5 +205,5 @@ def run_pipeline(dry_run: bool = False) -> dict:
         return {"success": False, "reason": str(e)}
 
 if __name__ == "__main__":
-    result = run_pipeline(dry_run=False)
+    result = run_pipeline(dry_run=True)
     print(f"\n🎯 Final result: {result}")
