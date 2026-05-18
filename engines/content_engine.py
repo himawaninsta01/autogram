@@ -39,21 +39,26 @@ def generate_content_brief(niche: str, topic: str, config: dict, client: Groq) -
         "Use natural and engaging English."
     )
 
-    prompt = f"""Kamu adalah social media strategist profesional.
-Buat content brief singkat untuk postingan Instagram tentang:
+    prompt = f"""Kamu adalah social media strategist profesional yang spesialis konten tips & trik AI tools.
+
+Buat content brief untuk postingan Instagram yang SANGAT SPESIFIK tentang:
 - Niche: {niche}
-- Topik spesifik: {topic}
+- Topik: {topic}
+
+PENTING: Konten harus berupa tips/trik KONKRET dan ACTIONABLE, bukan penjelasan umum.
+Contoh yang BAIK: "3 prompt Claude yang bikin ringkasan meeting jadi 10x lebih cepat"
+Contoh yang BURUK: "Manfaat AI untuk produktivitas"
 
 {lang_instruction}
 
 Output dalam format:
-ANGLE: [sudut pandang konten]
-TONE: [tone of voice]
-KEY_MESSAGE: [pesan utama dalam 1 kalimat]
-TARGET: [target audiens]
-CTA: [call to action]
-
-Singkat dan langsung ke poin."""
+ANGLE: [sudut pandang spesifik — harus berupa tips/trik/hack konkret]
+TONE: [conversational, helpful, insider knowledge]
+KEY_MESSAGE: [1 tips konkret yang bisa langsung dicoba]
+TARGET: [target audiens spesifik]
+CTA: [ajakan untuk coba tips tersebut]
+JUDUL_GAMBAR: [judul singkat max 5 kata untuk ditampilkan di gambar, huruf kapital]
+POIN_GAMBAR: [3-5 poin singkat untuk ditampilkan sebagai list di gambar]"""
 
     print(f"📝 Membuat content brief untuk '{topic}'...")
     return _chat(client, model, prompt)
@@ -69,9 +74,9 @@ def generate_caption(brief: str, niche: str, topic: str, config: dict, client: G
         "Write in natural English."
     )
 
-    prompt = f"""Kamu adalah copywriter Instagram profesional.
-Buat caption Instagram berdasarkan brief ini:
+    prompt = f"""Kamu adalah copywriter Instagram profesional yang ahli konten tips AI tools.
 
+Buat caption Instagram berdasarkan brief ini:
 {brief}
 
 Topik: {topic}
@@ -80,14 +85,18 @@ Niche: {niche}
 {lang_instruction}
 
 ATURAN:
-- Baris pertama harus berupa hook yang menarik perhatian (maksimal 125 karakter)
-- Body 3-4 baris yang informatif atau menghibur
-- Akhiri dengan CTA yang jelas
-- Maksimal {max_chars} karakter total
-- Jangan gunakan emoji berlebihan (maksimal 5)
-- Jangan sertakan hashtag (akan ditambahkan terpisah)
+- Hook baris pertama harus SPESIFIK dan mengejutkan, contoh:
+  "Kamu buang 2 jam/hari karena salah pakai Claude 😬"
+  "Ekstensi ini bikin ChatGPT-mu 3x lebih pintar (gratis)"
+  "Prompt ini yang dipakai programmer senior di Silicon Valley"
+- Body berisi 3-4 tips konkret yang bisa langsung dicoba
+- Gunakan angka dan data spesifik bila memungkinkan
+- Akhiri dengan CTA yang mendorong action nyata
+- Maksimal {max_chars} karakter
+- Emoji secukupnya (3-5), jangan berlebihan
+- Jangan sertakan hashtag
 
-Tulis HANYA caption-nya saja, tanpa penjelasan tambahan."""
+Tulis HANYA caption-nya saja."""
 
     print(f"✍️  Generating caption...")
     return _chat(client, model, prompt)
@@ -97,7 +106,7 @@ def generate_hashtags(niche: str, topic: str, config: dict, client: Groq) -> lis
     model = config["content"]["llm_model"]
     count = config["content"]["hashtag_count"]
 
-    prompt = f"""Buat {count} hashtag Instagram untuk konten tentang:
+    prompt = f"""Buat {count} hashtag Instagram untuk konten tips & trik tentang:
 - Niche: {niche}
 - Topik: {topic}
 - Target: Indonesia
@@ -118,26 +127,37 @@ Tulis HANYA hashtag-nya saja."""
     return hashtags[:count]
 
 def generate_image_prompt(niche: str, topic: str, brief: str, config: dict, client: Groq) -> str:
-    """Generate prompt untuk image generation (Pollinations.ai)."""
+    """Generate prompt untuk infografis via Pollinations.ai."""
     model = config["content"]["llm_model"]
-    style = config["image"]["style_map"].get(niche, "digital art, clean aesthetic")
 
-    prompt = f"""Buat image prompt untuk AI image generator berdasarkan:
-- Topik: {topic}
-- Style: {style}
-- Brief: {brief}
+    # Ekstrak JUDUL dan POIN dari brief
+    judul = ""
+    poin = ""
+    for line in brief.splitlines():
+        if line.startswith("JUDUL_GAMBAR:"):
+            judul = line.replace("JUDUL_GAMBAR:", "").strip()
+        if line.startswith("POIN_GAMBAR:"):
+            poin = line.replace("POIN_GAMBAR:", "").strip()
 
-ATURAN prompt:
-- Bahasa Inggris
-- Deskriptif dan visual
-- Sertakan style, lighting, composition
-- Cocok untuk Instagram square (1:1)
-- Tidak ada teks atau tulisan dalam gambar
-- Maksimal 100 kata
+    prompt = f"""Buat image prompt untuk AI image generator yang menghasilkan INFOGRAFIS Instagram.
 
-Tulis HANYA prompt-nya saja."""
+Topik: {topic}
+Judul untuk gambar: {judul if judul else topic.upper()}
+Poin konten: {poin if poin else "tips konkret, actionable"}
 
-    print(f"🎨 Generating image prompt...")
+Buat prompt untuk gambar infografis yang:
+- Berbentuk kartu info / cheat sheet bergaya modern
+- Ada judul besar di bagian atas
+- Ada 3-5 poin teks di badan gambar
+- Warna gelap elegan (dark navy, dark purple, atau dark teal) dengan aksen neon
+- Ada ikon atau elemen visual yang relevan
+- Typography yang bersih dan mudah dibaca
+- Gaya: modern UI design, infographic card, clean layout
+- Square format 1:1 untuk Instagram
+
+Tulis HANYA prompt bahasa Inggris-nya saja, maksimal 120 kata."""
+
+    print(f"🎨 Generating image prompt (infografis)...")
     return _chat(client, model, prompt)
 
 def run_content_engine(niche: str, topic: str) -> dict:
@@ -173,7 +193,7 @@ def run_content_engine(niche: str, topic: str) -> dict:
 if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv()
-    result = run_content_engine("AI", "gemini ai")
+    result = run_content_engine("AI", "tips claude ai")
     print("\n" + "="*50)
     print("✅ Content Engine selesai!")
     print(f"Caption length: {len(result['caption'])} karakter")
