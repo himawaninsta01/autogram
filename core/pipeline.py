@@ -116,6 +116,7 @@ def run_pipeline(dry_run: bool = False) -> dict:
             content["image_prompt"],
             content["niche"],
             content["topic"]
+            brief=content.get("brief", "")
         )
         content["image_path"] = image_path
         duration = (datetime.now() - t).total_seconds()

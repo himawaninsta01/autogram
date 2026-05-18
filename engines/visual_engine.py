@@ -1,11 +1,12 @@
-# visual_engine.py — v2.1 (Pollinations.ai + PIL Infografis)
-# Upgrade: gambar sekarang berupa infografis dengan teks dari brief
+# visual_engine.py — v3.0 (Full PIL Infografis)
+# Background dari Pollinations (dekoratif), teks 100% PIL — selalu terbaca.
 
 import time
 import random
 import requests
 import yaml
 import re
+import textwrap
 from pathlib import Path
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
@@ -15,294 +16,227 @@ import urllib.parse
 CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
 OUTPUT_DIR  = Path(__file__).parent.parent / "data" / "images"
 
+THEMES = {
+    "AI":                 {"bg": (8, 8, 24),    "accent": (0, 229, 160),  "accent2": (0, 180, 255)},
+    "teknologi":          {"bg": (8, 16, 40),   "accent": (0, 180, 255),  "accent2": (0, 229, 200)},
+    "desain":             {"bg": (8, 32, 24),   "accent": (0, 220, 120),  "accent2": (100, 255, 180)},
+    "bisnis online":      {"bg": (32, 16, 8),   "accent": (255, 180, 0),  "accent2": (255, 120, 50)},
+    "tips produktivitas": {"bg": (24, 8, 48),   "accent": (180, 100, 255),"accent2": (255, 100, 200)},
+}
+DEFAULT_THEME = {"bg": (8, 8, 24), "accent": (0, 229, 160), "accent2": (0, 180, 255)}
+
+FONT_BOLD = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+]
+FONT_REG = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+]
+
 def load_config():
     with open(CONFIG_PATH) as f:
         return yaml.safe_load(f)
 
-def generate_image(image_prompt: str, niche: str, topic: str,
-                   brief: str = "") -> str | None:
-    """
-    Generate gambar infografis via Pollinations.ai + overlay teks PIL.
-    Return: path file gambar, atau None jika gagal.
-    """
-    config = load_config()
-    width  = config["image"].get("width", 1080)
-    height = config["image"].get("height", 1080)
-
-    full_prompt = (
-        image_prompt.strip()
-        + ", infographic style, clean typography, high quality, "
-          "instagram worthy, professional design, no watermark"
-    )
-
-    print(f"🎨 Memulai image generation via Pollinations.ai...")
-    print(f"   Prompt: {image_prompt[:80]}...")
-
-    encoded_prompt = urllib.parse.quote(full_prompt)
-    url = (
-        f"https://image.pollinations.ai/prompt/{encoded_prompt}"
-        f"?width={width}&height={height}&nologo=true"
-        f"&seed={random.randint(1, 999999)}"
-    )
-
-    for attempt in range(1, 4):
+def get_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
+    paths = FONT_BOLD if bold else FONT_REG
+    for path in paths:
         try:
-            print(f"   Attempt {attempt}/3 — requesting...", end=" ", flush=True)
-            response = requests.get(url, timeout=60)
-
-            if response.status_code == 200 and response.headers.get(
-                "content-type", ""
-            ).startswith("image"):
-                print("✅")
-                img_path = save_image(response.content, niche, topic)
-
-                # Overlay teks jika ada brief
-                if brief and img_path:
-                    img_path = overlay_text(img_path, topic, brief, niche)
-
-                return img_path
-            else:
-                print(f"❌ status {response.status_code}")
-
-        except requests.Timeout:
-            print(f"⏱ timeout")
-        except Exception as e:
-            print(f"❌ {e}")
-
-        if attempt < 3:
-            wait = attempt * 5
-            print(f"   Retry dalam {wait}s...")
-            time.sleep(wait)
-
-    print(f"⚠️  Semua attempt gagal, pakai fallback image")
-    return generate_fallback_image(niche, topic, brief)
-
-def overlay_text(img_path: str, topic: str, brief: str, niche: str) -> str:
-    """
-    Overlay teks infografis di atas gambar yang sudah ada.
-    Ekstrak JUDUL dan POIN dari brief.
-    """
-    try:
-        img = Image.open(img_path).convert("RGBA")
-        W, H = img.size
-
-        # Ekstrak judul dan poin dari brief
-        judul = topic.upper()
-        poin_list = []
-
-        for line in brief.splitlines():
-            if line.startswith("JUDUL_GAMBAR:"):
-                judul = line.replace("JUDUL_GAMBAR:", "").strip().upper()
-            if line.startswith("POIN_GAMBAR:"):
-                raw = line.replace("POIN_GAMBAR:", "").strip()
-                # Support format: "1. xxx, 2. xxx" atau "- xxx, - xxx"
-                poin_list = [
-                    re.sub(r'^[\d\-\.\)\•]\s*', '', p.strip())
-                    for p in re.split(r'[,\n]|(?=\d\.)', raw)
-                    if p.strip()
-                ][:5]
-
-        if not poin_list:
-            return img_path  # Tidak ada poin, skip overlay
-
-        # ── Buat overlay panel bawah ──
-        overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(overlay)
-
-        panel_h = int(H * 0.52)
-        panel_y = H - panel_h
-
-        # Warna tema per niche
-        themes = {
-            "AI":                 ((10, 10, 30), (0, 229, 160)),
-            "teknologi":          ((10, 20, 50), (0, 180, 255)),
-            "desain":             ((10, 40, 30), (0, 229, 120)),
-            "bisnis online":      ((40, 20, 10), (255, 180, 0)),
-            "tips produktivitas": ((30, 10, 60), (180, 100, 255)),
-        }
-        bg_rgb, accent_rgb = themes.get(niche, ((10, 10, 30), (0, 229, 160)))
-
-        # Panel semi-transparan
-        panel = Image.new("RGBA", (W, panel_h), (*bg_rgb, 220))
-        overlay.paste(panel, (0, panel_y))
-
-        # Garis aksen atas panel
-        draw.rectangle([0, panel_y, W, panel_y + 5], fill=(*accent_rgb, 255))
-
-        # ── Font (fallback ke default jika tidak ada) ──
-        try:
-            font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 52)
-            font_poin  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 36)
-            font_icon  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 36)
+            return ImageFont.truetype(path, size)
         except:
-            font_title = ImageFont.load_default()
-            font_poin  = font_title
-            font_icon  = font_title
+            continue
+    return ImageFont.load_default()
 
-        draw_overlay = ImageDraw.Draw(overlay)
-
-        # Judul
-        title_y = panel_y + 22
-        draw_overlay.text(
-            (W // 2, title_y),
-            judul[:40],
-            font=font_title,
-            fill=(*accent_rgb, 255),
-            anchor="mt"
-        )
-
-        # Garis bawah judul
-        draw_overlay.rectangle(
-            [60, title_y + 62, W - 60, title_y + 65],
-            fill=(*accent_rgb, 120)
-        )
-
-        # Poin-poin
-        poin_start_y = title_y + 85
-        poin_gap = (panel_h - 110) // max(len(poin_list), 1)
-        poin_gap = min(poin_gap, 85)
-
-        for i, poin in enumerate(poin_list):
-            y = poin_start_y + i * poin_gap
-            if y > H - 40:
-                break
-
-            # Bullet
-            draw_overlay.text(
-                (55, y),
-                "▸",
-                font=font_icon,
-                fill=(*accent_rgb, 255),
-                anchor="lt"
-            )
-
-            # Teks poin (wrap jika terlalu panjang)
-            poin_text = poin[:60] + ("…" if len(poin) > 60 else "")
-            draw_overlay.text(
-                (100, y),
-                poin_text,
-                font=font_poin,
-                fill=(220, 230, 240, 255),
-                anchor="lt"
-            )
-
-        # Watermark kecil
-        try:
-            font_wm = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
-        except:
-            font_wm = font_poin
-        draw_overlay.text(
-            (W - 20, H - 20),
-            "@superchronos.ai",
-            font=font_wm,
-            fill=(150, 150, 150, 180),
-            anchor="rb"
-        )
-
-        # Gabungkan overlay dengan gambar asli
-        result = Image.alpha_composite(img, overlay).convert("RGB")
-
-        # Simpan (overwrite file yang sama)
-        result.save(img_path, "JPEG", quality=92)
-        print(f"✅ Teks infografis ditambahkan ke gambar")
-        return img_path
-
-    except Exception as e:
-        print(f"⚠️  Overlay teks gagal: {e} — pakai gambar tanpa overlay")
-        return img_path
-
-def save_image(img_data: bytes, niche: str, topic: str) -> str:
-    """Simpan image ke folder output, validasi dulu."""
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    try:
-        img = Image.open(io.BytesIO(img_data))
-        if img.size != (1080, 1080):
-            img = img.resize((1080, 1080), Image.LANCZOS)
-        if img.mode != "RGB":
-            img = img.convert("RGB")
-    except Exception as e:
-        print(f"⚠️  Gagal proses gambar: {e} — pakai fallback")
-        return generate_fallback_image(niche, topic)
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename  = f"{timestamp}_{niche.replace(' ', '_')}.jpg"
-    filepath  = OUTPUT_DIR / filename
-
-    img.save(filepath, "JPEG", quality=92)
-    print(f"✅ Image disimpan: {filename} ({img.size[0]}x{img.size[1]})")
-    return str(filepath)
-
-def generate_fallback_image(niche: str, topic: str, brief: str = "") -> str:
-    """Buat placeholder infografis saat Pollinations tidak tersedia."""
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    themes = {
-        "AI":                 ("#0a0a1e", "#00e5a0"),
-        "teknologi":          ("#0a1432", "#00b4ff"),
-        "desain":             ("#0a2818", "#00e578"),
-        "bisnis online":      ("#281408", "#ffb400"),
-        "tips produktivitas": ("#1e0a3c", "#b464ff"),
-    }
-    bg_hex, accent_hex = themes.get(niche, ("#0a0a1e", "#00e5a0"))
-
-    def hex_to_rgb(h):
-        h = h.lstrip("#")
-        return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
-
-    bg_rgb     = hex_to_rgb(bg_hex)
-    accent_rgb = hex_to_rgb(accent_hex)
-
-    img  = Image.new("RGB", (1080, 1080), bg_rgb)
-    draw = ImageDraw.Draw(img)
-
-    # Aksen border
-    draw.rectangle([0, 0, 1080, 8],       fill=accent_rgb)
-    draw.rectangle([0, 1072, 1080, 1080], fill=accent_rgb)
-
-    # Judul
+def parse_brief(brief: str, topic: str) -> tuple:
+    """Ekstrak JUDUL_GAMBAR dan POIN_GAMBAR dari brief."""
     judul = topic.upper()
     poin_list = []
     for line in brief.splitlines():
+        line = line.strip()
         if line.startswith("JUDUL_GAMBAR:"):
             judul = line.replace("JUDUL_GAMBAR:", "").strip().upper()
         if line.startswith("POIN_GAMBAR:"):
             raw = line.replace("POIN_GAMBAR:", "").strip()
-            poin_list = [p.strip() for p in raw.split(",") if p.strip()][:5]
+            parts = re.split(r',\s*(?=\d+\.)|,\s*(?=-)|[\n;]|,', raw)
+            poin_list = [
+                re.sub(r'^[\d\-\.\)\u2022\*]\s*', '', p.strip())
+                for p in parts if p.strip()
+            ][:5]
+    return judul, poin_list
 
-    try:
-        font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
-        font_poin  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 38)
-        font_wm    = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
-    except:
-        font_title = ImageFont.load_default()
-        font_poin  = font_title
-        font_wm    = font_title
+def fetch_background(prompt: str, W: int, H: int):
+    """Ambil background abstract dari Pollinations (tanpa teks)."""
+    bg_prompt = (
+        "abstract dark background, " + prompt[:80]
+        + ", no text, no letters, dark moody, bokeh, soft glow, cinematic"
+    )
+    encoded = urllib.parse.quote(bg_prompt)
+    url = (
+        f"https://image.pollinations.ai/prompt/{encoded}"
+        f"?width={W}&height={H}&nologo=true&seed={random.randint(1, 999999)}"
+    )
+    for attempt in range(1, 4):
+        try:
+            print(f"   BG attempt {attempt}/3...", end=" ", flush=True)
+            r = requests.get(url, timeout=55)
+            if r.status_code == 200 and r.headers.get("content-type", "").startswith("image"):
+                img = Image.open(io.BytesIO(r.content)).convert("RGB")
+                if img.size != (W, H):
+                    img = img.resize((W, H), Image.LANCZOS)
+                print("✅")
+                return img
+            print(f"❌ {r.status_code}")
+        except requests.Timeout:
+            print("⏱ timeout")
+        except Exception as e:
+            print(f"❌ {e}")
+        if attempt < 3:
+            time.sleep(attempt * 4)
+    return None
 
-    draw.text((540, 200), judul[:35], font=font_title, fill=accent_rgb, anchor="mm")
-    draw.rectangle([80, 240, 1000, 245], fill=(*accent_rgb, 100))
+def build_infographic(bg, judul, poin_list, niche, topic, W=1080, H=1080):
+    """Render infografis lengkap di atas background."""
+    theme   = THEMES.get(niche, DEFAULT_THEME)
+    bg_col  = theme["bg"]
+    accent  = theme["accent"]
+    accent2 = theme["accent2"]
+
+    # Base canvas
+    if bg:
+        canvas = bg.copy().convert("RGBA")
+        dark   = Image.new("RGBA", (W, H), (*bg_col, 195))
+        canvas = Image.alpha_composite(canvas, dark)
+    else:
+        canvas = Image.new("RGBA", (W, H), (*bg_col, 255))
+
+    draw = ImageDraw.Draw(canvas)
+
+    # Garis vertikal kiri
+    draw.rectangle([0, 0, 7, H], fill=(*accent, 255))
+
+    # Dot grid subtle
+    for x in range(80, W, 70):
+        for y in range(80, H, 70):
+            draw.ellipse([x-1, y-1, x+1, y+1], fill=(*accent, 20))
+
+    # ── HEADER ──
+    header_h = 230
+    hdr = Image.new("RGBA", (W, header_h), (*bg_col, 245))
+    canvas.paste(hdr, (0, 0), hdr)
+    draw.rectangle([0, header_h - 4, W, header_h], fill=(*accent, 255))
+
+    # Badge niche
+    font_badge = get_font(26, bold=True)
+    badge_txt  = niche.upper()
+    bb = draw.textbbox((0, 0), badge_txt, font=font_badge)
+    bw = bb[2] - bb[0] + 28
+    bh = bb[3] - bb[1] + 14
+    bx, by = 50, 32
+    draw.rounded_rectangle([bx, by, bx+bw, by+bh], radius=7,
+                            fill=(*accent, 35), outline=(*accent, 190), width=2)
+    draw.text((bx + 14, by + 7), badge_txt, font=font_badge, fill=(*accent, 255))
+
+    # Judul
+    font_judul = get_font(62, bold=True)
+    lines = textwrap.wrap(judul, width=24)[:2]
+    jy = by + bh + 16
+    for line in lines:
+        draw.text((50, jy), line, font=font_judul, fill=(240, 245, 255))
+        jy += 72
+
+    # Garis aksen bawah judul
+    draw.rectangle([50, jy + 6, 380, jy + 10], fill=(*accent2, 200))
+
+    # ── BODY: poin-poin ──
+    body_top = header_h + 36
+    body_bot = H - 100
+    n        = max(len(poin_list), 1)
+    slot_h   = (body_bot - body_top) // n
+
+    font_num  = get_font(42, bold=True)
+    font_main = get_font(36, bold=False)
+    font_sub  = get_font(28, bold=False)
 
     for i, poin in enumerate(poin_list):
-        y = 320 + i * 100
-        draw.text((80, y), f"▸ {poin[:55]}", font=font_poin, fill=(210, 220, 230), anchor="lm")
+        cy = body_top + i * slot_h + slot_h // 2
 
-    draw.text((1060, 1055), "@superchronos.ai", font=font_wm, fill=(120, 120, 120), anchor="rb")
+        # Lingkaran nomor
+        nx, r = 80, 32
+        draw.ellipse([nx-r, cy-r, nx+r, cy+r],
+                     fill=(*accent, 28), outline=(*accent, 200), width=2)
+        draw.text((nx, cy), str(i+1), font=font_num,
+                  fill=(*accent, 255), anchor="mm")
+
+        # Teks poin
+        px = nx + r + 22
+        wrapped = textwrap.wrap(poin, width=36)[:2]
+        if len(wrapped) == 1:
+            draw.text((px, cy), wrapped[0], font=font_main,
+                      fill=(220, 232, 248), anchor="lm")
+        else:
+            draw.text((px, cy - 20), wrapped[0], font=font_main,
+                      fill=(220, 232, 248), anchor="lm")
+            draw.text((px, cy + 20), wrapped[1], font=font_sub,
+                      fill=(155, 170, 200), anchor="lm")
+
+        # Garis separator
+        if i < n - 1:
+            sy = body_top + (i+1) * slot_h - 1
+            draw.rectangle([50, sy, W-50, sy+1], fill=(*accent, 28))
+
+    # ── FOOTER ──
+    fy = H - 88
+    draw.rectangle([0, fy, W, fy+2], fill=(*accent, 90))
+    font_wm = get_font(26, bold=False)
+    draw.text((W - 44, H - 44), "@superchronos.ai",
+              font=font_wm, fill=(125, 140, 165), anchor="rm")
+    font_icon = get_font(26, bold=True)
+    draw.text((44, H - 44), "✦ superchronos.ai",
+              font=font_icon, fill=(*accent, 100), anchor="lm")
+
+    return canvas.convert("RGB")
+
+def generate_image(image_prompt: str, niche: str, topic: str,
+                   brief: str = "") -> str | None:
+    """Generate infografis PIL dengan background dari Pollinations."""
+    config = load_config()
+    W = config["image"].get("width", 1080)
+    H = config["image"].get("height", 1080)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    judul, poin_list = parse_brief(brief, topic)
+
+    if not poin_list:
+        poin_list = [f"Tips {topic} #{i+1}" for i in range(3)]
+
+    print(f"🎨 Generating infografis PIL v3...")
+    print(f"   Judul : {judul}")
+    print(f"   Poin  : {len(poin_list)} item")
+
+    print(f"🖼️  Fetching background dari Pollinations...")
+    bg = fetch_background(image_prompt, W, H)
+    if not bg:
+        print("⚠️  Background gagal, pakai solid color")
+
+    img = build_infographic(bg, judul, poin_list, niche, topic, W, H)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename  = f"{timestamp}_{niche.replace(' ', '_')}_fallback.jpg"
+    filename  = f"{timestamp}_{niche.replace(' ', '_')}.jpg"
     filepath  = OUTPUT_DIR / filename
-    img.save(filepath, "JPEG", quality=85)
-
-    print(f"✅ Fallback infografis disimpan: {filename}")
+    img.save(str(filepath), "JPEG", quality=92)
+    print(f"✅ Infografis disimpan: {filename}")
     return str(filepath)
 
 if __name__ == "__main__":
-    test_prompt = (
-        "dark navy background, modern infographic card design, "
-        "neon green accents, clean typography, AI tools cheat sheet"
-    )
     test_brief = """JUDUL_GAMBAR: 5 PROMPT CLAUDE TERBAIK
-POIN_GAMBAR: Ringkas meeting jadi 5 menit, Buat email profesional, Debug kode lebih cepat, Riset topik apapun, Buat konten viral"""
+POIN_GAMBAR: Ringkas meeting jadi 5 menit, Buat email profesional sekali klik, Debug kode lebih cepat, Riset topik apapun dalam 30 detik, Buat konten viral dengan mudah"""
 
-    result = generate_image(test_prompt, "AI", "tips claude ai", brief=test_brief)
+    result = generate_image(
+        "futuristic AI neural network glow blue green",
+        "AI",
+        "tips prompt claude",
+        brief=test_brief
+    )
     print(f"\n🎯 Output: {result}")
