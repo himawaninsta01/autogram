@@ -1,18 +1,11 @@
-# visual_engine.py — v4.0 (Carousel Multi-Slide)
-# Generate multiple slide PIL untuk carousel Instagram.
-# Slide 1: Cover, Slide 2-N: 1 poin/slide, Slide terakhir: CTA
+# visual_engine.py — v4.0 (Prompt Breakdown Carousel)
+# Slide: Cover → Prompt → Output → Breakdown x3 → CTA
 
-import time
-import random
-import requests
-import yaml
-import re
-import textwrap
+import time, random, requests, yaml, re, textwrap, json
 from pathlib import Path
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
-import io
-import urllib.parse
+import io, urllib.parse
 
 CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
 OUTPUT_DIR  = Path(__file__).parent.parent / "data" / "images"
@@ -29,358 +22,416 @@ DEFAULT_THEME = {"bg": (8, 8, 24), "accent": (0, 229, 160), "accent2": (0, 180, 
 FONT_BOLD = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-    "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
 ]
 FONT_REG = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-    "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+]
+FONT_MONO = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
 ]
 
 def load_config():
     with open(CONFIG_PATH) as f:
         return yaml.safe_load(f)
 
-def get_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
-    paths = FONT_BOLD if bold else FONT_REG
-    for path in paths:
-        try:
-            return ImageFont.truetype(path, size)
-        except:
-            continue
+def get_font(size, bold=False, mono=False):
+    paths = FONT_MONO if mono else (FONT_BOLD if bold else FONT_REG)
+    for p in paths:
+        try: return ImageFont.truetype(p, size)
+        except: continue
     return ImageFont.load_default()
 
-def parse_brief(brief: str, topic: str) -> tuple:
-    """Ekstrak JUDUL_GAMBAR dan POIN_GAMBAR dari brief."""
-    judul = topic.upper()
-    poin_list = []
+def parse_brief(brief: str, topic: str) -> dict:
+    """Parse semua field dari brief string."""
+    data = {
+        "judul": topic.upper(),
+        "poin": [],
+        "ai_tool": "AI",
+        "prompt": "",
+        "output": "",
+        "breakdown": [],
+    }
     for line in brief.splitlines():
         line = line.strip()
         if line.startswith("JUDUL_GAMBAR:"):
-            judul = line.replace("JUDUL_GAMBAR:", "").strip().upper()
-        if line.startswith("POIN_GAMBAR:"):
+            data["judul"] = line.replace("JUDUL_GAMBAR:", "").strip().upper()
+        elif line.startswith("POIN_GAMBAR:"):
             raw = line.replace("POIN_GAMBAR:", "").strip()
-            parts = re.split(r',\s*(?=\d+\.)|,\s*(?=-)|[\n;]|,', raw)
-            poin_list = [
-                re.sub(r'^[\d\-\.\)\u2022\*]\s*', '', p.strip())
-                for p in parts if p.strip()
-            ][:5]
-    return judul, poin_list
+            data["poin"] = [p.strip() for p in raw.split(",") if p.strip()][:5]
+        elif line.startswith("AI_TOOL:"):
+            data["ai_tool"] = line.replace("AI_TOOL:", "").strip()
+        elif line.startswith("PROMPT:"):
+            data["prompt"] = line.replace("PROMPT:", "").strip()
+        elif line.startswith("OUTPUT:"):
+            data["output"] = line.replace("OUTPUT:", "").strip()
+        elif line.startswith("BREAKDOWN_"):
+            parts = line.split(":", 1)[1].strip().split("|", 1)
+            if len(parts) == 2:
+                data["breakdown"].append({
+                    "bagian": parts[0].strip(),
+                    "penjelasan": parts[1].strip()
+                })
+    return data
 
 def fetch_background(prompt: str, W: int, H: int):
-    """Ambil 1 background dari Pollinations, dipakai semua slide."""
-    bg_prompt = (
-        "abstract dark background, " + prompt[:80]
-        + ", no text, no letters, dark moody, bokeh, soft glow, cinematic"
-    )
+    bg_prompt = "abstract dark tech background, " + prompt[:80] + ", no text, bokeh, soft neon glow"
     encoded = urllib.parse.quote(bg_prompt)
-    url = (
-        f"https://image.pollinations.ai/prompt/{encoded}"
-        f"?width={W}&height={H}&nologo=true&seed={random.randint(1, 999999)}"
-    )
+    url = (f"https://image.pollinations.ai/prompt/{encoded}"
+           f"?width={W}&height={H}&nologo=true&seed={random.randint(1,999999)}")
     for attempt in range(1, 4):
         try:
-            print(f"   BG attempt {attempt}/3...", end=" ", flush=True)
+            print(f"   BG {attempt}/3...", end=" ", flush=True)
             r = requests.get(url, timeout=55)
-            if r.status_code == 200 and r.headers.get("content-type", "").startswith("image"):
+            if r.status_code == 200 and r.headers.get("content-type","").startswith("image"):
                 img = Image.open(io.BytesIO(r.content)).convert("RGB")
                 if img.size != (W, H):
                     img = img.resize((W, H), Image.LANCZOS)
                 print("✅")
                 return img
-            print(f"❌ {r.status_code}")
-        except requests.Timeout:
-            print("⏱ timeout")
-        except Exception as e:
-            print(f"❌ {e}")
-        if attempt < 3:
-            time.sleep(attempt * 4)
+            print(f"❌{r.status_code}")
+        except requests.Timeout: print("⏱")
+        except Exception as e: print(f"❌{e}")
+        if attempt < 3: time.sleep(attempt * 4)
     return None
 
-def base_canvas(bg, bg_col, accent, W, H) -> tuple:
-    """Buat canvas dasar dengan background + overlay gelap."""
+def base_canvas(bg, bg_col, accent, W, H):
     if bg:
         canvas = bg.copy().convert("RGBA")
-        dark = Image.new("RGBA", (W, H), (*bg_col, 200))
+        dark = Image.new("RGBA", (W, H), (*bg_col, 205))
         canvas = Image.alpha_composite(canvas, dark)
     else:
         canvas = Image.new("RGBA", (W, H), (*bg_col, 255))
     draw = ImageDraw.Draw(canvas)
-    # Garis kiri
     draw.rectangle([0, 0, 7, H], fill=(*accent, 255))
-    # Dot grid
     for x in range(80, W, 70):
         for y in range(80, H, 70):
-            draw.ellipse([x-1, y-1, x+1, y+1], fill=(*accent, 18))
+            draw.ellipse([x-1,y-1,x+1,y+1], fill=(*accent, 15))
     return canvas, draw
 
-def draw_footer(draw, canvas, accent, W, H, slide_num, total_slides):
-    """Footer standar semua slide: watermark + indikator slide."""
-    fy = H - 88
-    draw.rectangle([0, fy, W, fy+2], fill=(*accent, 90))
+def draw_slide_indicator(draw, W, H, current, total, accent):
+    dot_r, gap = 5, 18
+    tw = total*(dot_r*2) + (total-1)*gap
+    sx = (W - tw)//2
+    for i in range(total):
+        cx = sx + i*(dot_r*2+gap) + dot_r
+        cy = H - 42
+        fill = (*accent, 255) if i == current else (*accent, 55)
+        draw.ellipse([cx-dot_r,cy-dot_r,cx+dot_r,cy+dot_r], fill=fill)
 
-    font_wm = get_font(26)
-    draw.text((W - 44, H - 44), "@superchronos.ai",
-              font=font_wm, fill=(125, 140, 165), anchor="rm")
+def draw_watermark(draw, W, H, accent):
+    font = get_font(24)
+    draw.rectangle([0, H-80, W, H-78], fill=(*accent, 70))
+    draw.text((W-40, H-42), "@superchronos.ai", font=font,
+              fill=(120,135,160), anchor="rm")
 
-    # Indikator slide (dot)
-    dot_total = total_slides
-    dot_r = 6
-    dot_gap = 20
-    total_w = dot_total * (dot_r*2) + (dot_total-1) * dot_gap
-    start_x = (W - total_w) // 2
-    for i in range(dot_total):
-        cx = start_x + i * (dot_r*2 + dot_gap) + dot_r
-        cy = H - 44
-        if i == slide_num:
-            draw.ellipse([cx-dot_r, cy-dot_r, cx+dot_r, cy+dot_r],
-                         fill=(*accent, 255))
-        else:
-            draw.ellipse([cx-dot_r, cy-dot_r, cx+dot_r, cy+dot_r],
-                         fill=(*accent, 60))
-
-def build_cover_slide(bg, judul, niche, caption_hook, theme, W=1080, H=1080) -> Image.Image:
-    """
-    Slide 1 — Cover:
-    Badge niche | Judul besar | Hook 1 kalimat | "Swipe →"
-    """
-    accent  = theme["accent"]
-    accent2 = theme["accent2"]
-    bg_col  = theme["bg"]
-
+# ══════════════════════════════════════════════
+# SLIDE 1: COVER
+# ══════════════════════════════════════════════
+def slide_cover(bg, data, niche, caption_hook, theme, total, W=1080, H=1080):
+    accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
-    # Badge niche
+    # Badge AI tool
     font_badge = get_font(28, bold=True)
-    badge_txt  = f"  {niche.upper()}  "
-    bb = draw.textbbox((0,0), badge_txt, font=font_badge)
-    bw = bb[2]-bb[0]+20; bh = bb[3]-bb[1]+14
-    bx, by = 50, 80
-    draw.rounded_rectangle([bx, by, bx+bw, by+bh], radius=8,
-                            fill=(*accent, 35), outline=(*accent, 200), width=2)
-    draw.text((bx+10, by+7), badge_txt.strip(), font=font_badge, fill=(*accent, 255))
+    badge = f"  {data['ai_tool'].upper()}  "
+    bb = draw.textbbox((0,0), badge, font=font_badge)
+    bw, bh = bb[2]-bb[0]+20, bb[3]-bb[1]+14
+    bx, by = 50, 75
+    draw.rounded_rectangle([bx,by,bx+bw,by+bh], radius=8,
+                            fill=(*accent,35), outline=(*accent,200), width=2)
+    draw.text((bx+10,by+7), badge.strip(), font=font_badge, fill=(*accent,255))
+
+    # Label use case
+    font_uc = get_font(30)
+    uc_text = f"untuk: {data.get('use_case', niche)}"
+    draw.text((50, by+bh+16), uc_text, font=font_uc, fill=(*accent2, 180))
 
     # Judul besar
-    font_judul = get_font(72, bold=True)
-    jy = by + bh + 40
-    for line in textwrap.wrap(judul, width=20)[:3]:
-        draw.text((50, jy), line, font=font_judul, fill=(240, 245, 255))
-        jy += 84
+    font_judul = get_font(70, bold=True)
+    jy = by + bh + 70
+    for line in textwrap.wrap(data["judul"], width=20)[:3]:
+        draw.text((50, jy), line, font=font_judul, fill=(240,245,255))
+        jy += 82
 
     # Garis aksen
-    draw.rectangle([50, jy+10, 420, jy+14], fill=(*accent2, 220))
+    draw.rectangle([50, jy+10, min(50+len(data["judul"])*22, W-50), jy+14],
+                   fill=(*accent2, 200))
 
-    # Hook singkat
-    font_hook = get_font(36)
-    hook_short = textwrap.wrap(caption_hook, width=38)[:3]
-    hy = jy + 50
-    for line in hook_short:
-        draw.text((50, hy), line, font=font_hook, fill=(180, 195, 215))
+    # Hook
+    font_hook = get_font(34)
+    hy = jy + 52
+    for line in textwrap.wrap(caption_hook, width=36)[:3]:
+        draw.text((50, hy), line, font=font_hook, fill=(170,185,212))
         hy += 46
 
-    # Swipe indicator
-    font_swipe = get_font(32, bold=True)
-    draw.text((W - 50, H//2), "swipe →", font=font_swipe,
-              fill=(*accent, 200), anchor="rm")
+    # Swipe
+    font_sw = get_font(30, bold=True)
+    draw.text((W-50, H//2+100), "swipe →", font=font_sw,
+              fill=(*accent, 180), anchor="rm")
 
-    draw_footer(draw, canvas, accent, W, H, 0, 1)  # placeholder, diupdate nanti
-
+    draw_slide_indicator(draw, W, H, 0, total, accent)
+    draw_watermark(draw, W, H, accent)
     return canvas.convert("RGB")
 
-def build_point_slide(bg, poin: str, num: int, total: int,
-                      niche: str, theme: dict, W=1080, H=1080) -> Image.Image:
-    """
-    Slide poin — 1 tips per slide:
-    Nomor besar | Judul poin | Penjelasan detail
-    """
-    accent  = theme["accent"]
-    accent2 = theme["accent2"]
-    bg_col  = theme["bg"]
-
+# ══════════════════════════════════════════════
+# SLIDE 2: PROMPT (tampilan kode)
+# ══════════════════════════════════════════════
+def slide_prompt(bg, data, theme, total, W=1080, H=1080):
+    accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
-    # Nomor besar di background (dekoratif)
-    font_num_bg = get_font(320, bold=True)
-    draw.text((W - 30, H//2 + 60), str(num),
-              font=font_num_bg, fill=(*accent, 12), anchor="rm")
+    # Header
+    font_h = get_font(32, bold=True)
+    draw.text((50, 55), f"📋 PROMPT {data['ai_tool'].upper()}", font=font_h,
+              fill=(*accent, 255))
+    draw.rectangle([50, 95, W-50, 98], fill=(*accent, 120))
 
-    # Label "TIP #N"
-    font_label = get_font(30, bold=True)
-    label = f"TIP #{num} dari {total}"
-    draw.text((50, 70), label, font=font_label, fill=(*accent, 200))
-    draw.rectangle([50, 108, 50 + len(label)*18, 112], fill=(*accent, 100))
+    # Kotak kode
+    box_x, box_y = 40, 115
+    box_w, box_h = W - 80, H - 200
+    draw.rounded_rectangle([box_x, box_y, box_x+box_w, box_y+box_h],
+                            radius=16, fill=(15, 20, 40, 230),
+                            outline=(*accent, 100), width=2)
 
-    # Judul poin (besar)
-    font_poin_title = get_font(60, bold=True)
-    py = 140
-    for line in textwrap.wrap(poin, width=22)[:2]:
-        draw.text((50, py), line, font=font_poin_title, fill=(235, 242, 255))
-        py += 72
+    # Dot dekoratif (terminal style)
+    dot_colors = [(255,90,90), (255,200,50), (50,210,100)]
+    for i, dc in enumerate(dot_colors):
+        cx = box_x + 22 + i*20
+        draw.ellipse([cx-6,box_y+16,cx+6,box_y+28], fill=dc)
 
-    # Garis pemisah
-    draw.rectangle([50, py+16, W-50, py+20], fill=(*accent2, 150))
+    # Label
+    font_label = get_font(22)
+    draw.text((box_x + box_w - 16, box_y + 16), f"copy → {data['ai_tool']}",
+              font=font_label, fill=(*accent, 120), anchor="rm")
 
-    # Penjelasan — diambil dari poin itu sendiri (diperluas)
-    # Karena poin sudah cukup deskriptif, kita tampilkan ulang lebih besar
-    font_detail = get_font(38)
-    detail_lines = textwrap.wrap(poin, width=30)
-    dy = py + 60
-    for line in detail_lines[:4]:
-        draw.text((50, dy), line, font=font_detail, fill=(170, 185, 210))
-        dy += 52
+    # Teks prompt (monospace)
+    font_code = get_font(30, mono=True)
+    prompt_text = data.get("prompt", "")
+    py = box_y + 52
+    for line in textwrap.wrap(prompt_text, width=38)[:14]:
+        if py > box_y + box_h - 40: break
+        draw.text((box_x + 24, py), line, font=font_code, fill=(200, 215, 235))
+        py += 42
 
-    # Swipe hint (bukan slide terakhir)
-    font_swipe = get_font(28, bold=True)
-    draw.text((W - 50, H - 110), "→ next",
-              font=font_swipe, fill=(*accent, 150), anchor="rm")
-
-    draw_footer(draw, canvas, accent, W, H, num, 1)  # placeholder
-
+    draw_slide_indicator(draw, W, H, 1, total, accent)
+    draw_watermark(draw, W, H, accent)
     return canvas.convert("RGB")
 
-def build_cta_slide(bg, niche: str, judul: str, theme: dict,
-                    W=1080, H=1080) -> Image.Image:
-    """
-    Slide terakhir — CTA:
-    Ajakan save/share/follow + username
-    """
-    accent  = theme["accent"]
-    accent2 = theme["accent2"]
-    bg_col  = theme["bg"]
-
+# ══════════════════════════════════════════════
+# SLIDE 3: OUTPUT (chat bubble style)
+# ══════════════════════════════════════════════
+def slide_output(bg, data, theme, total, W=1080, H=1080):
+    accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
-    # Lingkaran dekoratif besar di tengah
-    cx, cy, cr = W//2, H//2 - 60, 200
-    draw.ellipse([cx-cr, cy-cr, cx+cr, cy+cr],
-                 fill=(*accent, 15), outline=(*accent, 60), width=3)
+    # Header
+    font_h = get_font(32, bold=True)
+    draw.text((50, 55), f"✨ HASIL DARI {data['ai_tool'].upper()}", font=font_h,
+              fill=(*accent, 255))
+    draw.rectangle([50, 95, W-50, 98], fill=(*accent, 120))
 
-    # Teks CTA utama
-    font_cta = get_font(64, bold=True)
-    draw.text((W//2, cy - 60), "SIMPAN", font=font_cta,
-              fill=(*accent, 255), anchor="mm")
-    draw.text((W//2, cy + 10), "konten ini!", font=font_cta,
-              fill=(240, 245, 255), anchor="mm")
+    # Bubble output
+    bub_x, bub_y = 40, 115
+    bub_w, bub_h = W - 80, H - 195
+    draw.rounded_rectangle([bub_x, bub_y, bub_x+bub_w, bub_y+bub_h],
+                            radius=20, fill=(20, 30, 55, 235),
+                            outline=(*accent2, 80), width=2)
 
-    # Sub teks
-    font_sub = get_font(34)
-    draw.text((W//2, cy + 100), "Bagikan ke teman yang butuh tips ini 👇",
-              font=font_sub, fill=(160, 175, 200), anchor="mm")
+    # Avatar AI
+    av_r = 28
+    av_cx, av_cy = bub_x + 40, bub_y + 45
+    draw.ellipse([av_cx-av_r, av_cy-av_r, av_cx+av_r, av_cy+av_r],
+                 fill=(*accent2, 60), outline=(*accent2, 200), width=2)
+    font_av = get_font(24, bold=True)
+    draw.text((av_cx, av_cy), data["ai_tool"][0], font=font_av,
+              fill=(*accent2, 255), anchor="mm")
 
-    # Garis pemisah
-    draw.rectangle([100, cy+155, W-100, cy+158], fill=(*accent, 80))
+    # Nama AI
+    font_name = get_font(26, bold=True)
+    draw.text((av_cx + av_r + 14, av_cy - 8), data["ai_tool"],
+              font=font_name, fill=(*accent2, 230))
+    font_sub = get_font(22)
+    draw.text((av_cx + av_r + 14, av_cy + 16), "AI Assistant",
+              font=font_sub, fill=(120,135,165))
+
+    # Teks output
+    font_out = get_font(32)
+    output_text = data.get("output", "")
+    oy = bub_y + 96
+    for line in textwrap.wrap(output_text, width=34)[:12]:
+        if oy > bub_y + bub_h - 40: break
+        draw.text((bub_x + 24, oy), line, font=font_out, fill=(210,222,242))
+        oy += 46
+
+    draw_slide_indicator(draw, W, H, 2, total, accent)
+    draw_watermark(draw, W, H, accent)
+    return canvas.convert("RGB")
+
+# ══════════════════════════════════════════════
+# SLIDE 4-6: BREAKDOWN (per bagian prompt)
+# ══════════════════════════════════════════════
+def slide_breakdown(bg, item: dict, idx: int, total_bd: int,
+                    theme, slide_num, total_slides, W=1080, H=1080):
+    accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
+    canvas, draw = base_canvas(bg, bg_col, accent, W, H)
+
+    # Header
+    font_h = get_font(30, bold=True)
+    draw.text((50, 55), f"🔍 BREAKDOWN PROMPT — BAGIAN {idx+1}/{total_bd}",
+              font=font_h, fill=(*accent, 220))
+    draw.rectangle([50, 93, W-50, 96], fill=(*accent, 100))
+
+    # Nomor besar dekoratif
+    font_num_bg = get_font(280, bold=True)
+    draw.text((W-20, H//2+80), str(idx+1), font=font_num_bg,
+              fill=(*accent, 10), anchor="rm")
+
+    # Kotak highlight bagian prompt
+    hbox_y = 130
+    draw.rounded_rectangle([40, hbox_y, W-40, hbox_y+110], radius=14,
+                            fill=(*accent, 20), outline=(*accent, 150), width=2)
+    font_quote = get_font(36, mono=True)
+    draw.text((W//2, hbox_y+55), f'"{item["bagian"]}"',
+              font=font_quote, fill=(*accent, 255), anchor="mm")
+
+    # Label
+    font_lbl = get_font(24)
+    draw.text((W//2, hbox_y+90), "↑ bagian ini penting karena...",
+              font=font_lbl, fill=(*accent, 120), anchor="mm")
+
+    # Penjelasan
+    font_penj = get_font(38)
+    py = hbox_y + 155
+    for line in textwrap.wrap(item["penjelasan"], width=30)[:6]:
+        draw.text((50, py), line, font=font_penj, fill=(215,228,248))
+        py += 54
+
+    # Efek visual — panah ke bawah
+    font_arr = get_font(44, bold=True)
+    draw.text((W//2, py+30), "↓", font=font_arr, fill=(*accent2, 150), anchor="mm")
+
+    # Sub-label "efeknya ke output"
+    font_eff = get_font(30)
+    draw.text((W//2, py+82), "efeknya ke output AI",
+              font=font_eff, fill=(*accent2, 120), anchor="mm")
+
+    draw_slide_indicator(draw, W, H, slide_num, total_slides, accent)
+    draw_watermark(draw, W, H, accent)
+    return canvas.convert("RGB")
+
+# ══════════════════════════════════════════════
+# SLIDE TERAKHIR: CTA
+# ══════════════════════════════════════════════
+def slide_cta(bg, data, niche, theme, total, W=1080, H=1080):
+    accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
+    canvas, draw = base_canvas(bg, bg_col, accent, W, H)
+
+    cx, cy = W//2, H//2 - 40
+
+    # Lingkaran dekoratif
+    for r, a in [(220, 15), (170, 25), (120, 40)]:
+        draw.ellipse([cx-r,cy-r,cx+r,cy+r], outline=(*accent, a), width=2)
+
+    # Teks utama
+    font_main = get_font(70, bold=True)
+    draw.text((cx, cy-70), "SAVE", font=font_main, fill=(*accent,255), anchor="mm")
+    draw.text((cx, cy+10), "prompt ini!", font=font_main,
+              fill=(240,245,255), anchor="mm")
+
+    # Sub
+    font_sub = get_font(32)
+    draw.text((cx, cy+90), "Bagikan ke teman yang butuh 👇",
+              font=font_sub, fill=(160,175,200), anchor="mm")
+
+    draw.rectangle([80, cy+138, W-80, cy+141], fill=(*accent,70))
 
     # Username
-    font_user = get_font(44, bold=True)
-    draw.text((W//2, cy + 210), "@superchronos.ai",
-              font=font_user, fill=(*accent, 255), anchor="mm")
+    font_usr = get_font(46, bold=True)
+    draw.text((cx, cy+180), "@superchronos.ai",
+              font=font_usr, fill=(*accent,255), anchor="mm")
 
-    # Topik tag
+    # Tool tag
     font_tag = get_font(28)
-    draw.text((W//2, cy + 268), f"#{niche.replace(' ', '')} #TipsAI #TeknologiIndonesia",
-              font=font_tag, fill=(*accent2, 160), anchor="mm")
+    draw.text((cx, cy+236), f"#{data['ai_tool']} #PromptEngineering #TipsAI",
+              font=font_tag, fill=(*accent2,150), anchor="mm")
 
-    draw_footer(draw, canvas, accent, W, H, 0, 1)  # placeholder
-
+    draw_slide_indicator(draw, W, H, total-1, total, accent)
+    draw_watermark(draw, W, H, accent)
     return canvas.convert("RGB")
 
-def add_slide_dots(img: Image.Image, slide_idx: int, total: int,
-                   accent, W: int, H: int) -> Image.Image:
-    """Tambahkan dot indikator slide yang benar."""
-    canvas = img.convert("RGBA")
-    draw   = ImageDraw.Draw(canvas)
-    dot_r  = 6
-    dot_gap = 20
-    total_w = total * (dot_r*2) + (total-1) * dot_gap
-    sx = (W - total_w) // 2
-    for i in range(total):
-        cx = sx + i * (dot_r*2 + dot_gap) + dot_r
-        cy = H - 44
-        fill = (*accent, 255) if i == slide_idx else (*accent, 55)
-        draw.ellipse([cx-dot_r, cy-dot_r, cx+dot_r, cy+dot_r], fill=fill)
-    return canvas.convert("RGB")
-
+# ══════════════════════════════════════════════
+# MAIN FUNCTION
+# ══════════════════════════════════════════════
 def generate_carousel(image_prompt: str, niche: str, topic: str,
-                      brief: str = "", caption: str = "") -> list[str]:
-    """
-    Generate semua slide carousel.
-    Return: list path file gambar (cover + poin slides + cta).
-    """
+                      brief: str = "", caption: str = "") -> list:
     config = load_config()
     W = config["image"].get("width", 1080)
     H = config["image"].get("height", 1080)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    theme   = THEMES.get(niche, DEFAULT_THEME)
-    accent  = theme["accent"]
+    theme  = THEMES.get(niche, DEFAULT_THEME)
+    accent = theme["accent"]
+    data   = parse_brief(brief, topic)
+    hook   = caption.split("\n")[0][:120] if caption else data["judul"]
 
-    judul, poin_list = parse_brief(brief, topic)
-    if not poin_list:
-        poin_list = [
-            f"Gunakan {topic} untuk produktivitas harian",
-            f"Optimalkan workflow dengan {topic}",
-            f"Tips terbaik menggunakan {topic}",
-        ]
+    # Hitung total slide: cover + prompt + output + breakdown*N + cta
+    n_breakdown  = len(data["breakdown"]) if data["breakdown"] else 3
+    total_slides = 1 + 1 + 1 + n_breakdown + 1
 
-    total_slides = 1 + len(poin_list) + 1  # cover + poin + cta
-    hook = caption.split("\n")[0][:120] if caption else judul
+    print(f"🎨 Generating carousel {total_slides} slide (Prompt Breakdown)...")
+    print(f"   Tool : {data['ai_tool']}")
+    print(f"   Judul: {data['judul']}")
 
-    print(f"🎨 Generating carousel {total_slides} slide...")
-    print(f"   Judul : {judul}")
-    print(f"   Poin  : {len(poin_list)} item")
-
-    # Fetch 1 background, dipakai semua slide
-    print(f"🖼️  Fetching background...")
+    # Fetch background sekali, dipakai semua slide
     bg = fetch_background(image_prompt, W, H)
-    if not bg:
-        print("⚠️  Background gagal, pakai solid color")
 
     paths = []
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    niche_slug = niche.replace(" ", "_")
 
-    # ── Slide 1: Cover ──
-    cover = build_cover_slide(bg, judul, niche, hook, theme, W, H)
-    cover = add_slide_dots(cover, 0, total_slides, accent, W, H)
-    p = OUTPUT_DIR / f"{timestamp}_{niche.replace(' ','_')}_s00_cover.jpg"
-    cover.save(str(p), "JPEG", quality=92)
-    paths.append(str(p))
-    print(f"   ✅ Slide 1/{ total_slides}: Cover")
-
-    # ── Slide 2..N: Poin ──
-    for i, poin in enumerate(poin_list):
-        slide = build_point_slide(bg, poin, i+1, len(poin_list), niche, theme, W, H)
-        slide = add_slide_dots(slide, i+1, total_slides, accent, W, H)
-        p = OUTPUT_DIR / f"{timestamp}_{niche.replace(' ','_')}_s{i+1:02d}_poin.jpg"
-        slide.save(str(p), "JPEG", quality=92)
+    def save(img, label):
+        p = OUTPUT_DIR / f"{ts}_{niche_slug}_{label}.jpg"
+        img.save(str(p), "JPEG", quality=92)
         paths.append(str(p))
-        print(f"   ✅ Slide {i+2}/{total_slides}: Poin {i+1}")
+        print(f"   ✅ {label}")
+        return str(p)
 
-    # ── Slide terakhir: CTA ──
-    cta = build_cta_slide(bg, niche, judul, theme, W, H)
-    cta = add_slide_dots(cta, total_slides-1, total_slides, accent, W, H)
-    p = OUTPUT_DIR / f"{timestamp}_{niche.replace(' ','_')}_s{total_slides-1:02d}_cta.jpg"
-    cta.save(str(p), "JPEG", quality=92)
-    paths.append(str(p))
-    print(f"   ✅ Slide {total_slides}/{total_slides}: CTA")
+    save(slide_cover(bg, data, niche, hook, theme, total_slides, W, H), "s00_cover")
+    save(slide_prompt(bg, data, theme, total_slides, W, H), "s01_prompt")
+    save(slide_output(bg, data, theme, total_slides, W, H), "s02_output")
+
+    for i, item in enumerate(data["breakdown"][:3]):
+        save(slide_breakdown(bg, item, i, min(3, len(data["breakdown"])),
+                             theme, 3+i, total_slides, W, H),
+             f"s{3+i:02d}_breakdown{i+1}")
+
+    save(slide_cta(bg, data, niche, theme, total_slides, W, H),
+         f"s{total_slides-1:02d}_cta")
 
     print(f"✅ Carousel selesai: {len(paths)} slide")
     return paths
 
-# Backward compat — single image (tidak dipakai lagi tapi jaga-jaga)
 def generate_image(image_prompt: str, niche: str, topic: str,
-                   brief: str = "", caption: str = "") -> list[str]:
+                   brief: str = "", caption: str = "") -> list:
+    """Alias untuk backward compat."""
     return generate_carousel(image_prompt, niche, topic, brief, caption)
 
 if __name__ == "__main__":
-    test_brief = """JUDUL_GAMBAR: 5 PROMPT CLAUDE TERBAIK
-POIN_GAMBAR: Ringkas meeting jadi 5 menit, Buat email profesional sekali klik, Debug kode lebih cepat, Riset topik apapun dalam 30 detik, Buat konten viral dengan mudah"""
-    test_caption = "Kamu buang 2 jam/hari karena salah pakai Claude 😬 Ini 5 prompt yang mengubah segalanya."
+    test_brief = """JUDUL_GAMBAR: PROMPT EMAIL PROFESIONAL
+AI_TOOL: Claude
+PROMPT: Kamu adalah asisten profesional. Tolong tulis email kepada klien yang menjelaskan keterlambatan pengiriman proyek. Gunakan nada yang profesional namun tetap empati. Sertakan: alasan keterlambatan, solusi yang ditawarkan, dan timeline baru yang realistis. Maksimal 150 kata.
+OUTPUT: Yth. Bapak/Ibu [Nama Klien], Kami ingin menyampaikan permohonan maaf atas keterlambatan pengiriman proyek. Hal ini disebabkan oleh kendala teknis yang tidak terduga. Sebagai solusi, kami telah menambah tim dan menjadwalkan penyelesaian pada 25 Mei 2026.
+BREAKDOWN_1: Kamu adalah asisten profesional | Menetapkan persona membuat output lebih konsisten dan terfokus.
+BREAKDOWN_2: nada yang profesional namun empati | Dua kata kunci ini mengontrol tone seluruh output.
+BREAKDOWN_3: Maksimal 150 kata | Batasan panjang mencegah output yang terlalu bertele-tele."""
 
     paths = generate_carousel(
-        "futuristic AI neural network glow blue green",
-        "AI", "tips prompt claude",
-        brief=test_brief, caption=test_caption
+        "dark professional email interface glow",
+        "AI", "email profesional dengan Claude",
+        brief=test_brief,
+        caption="Email profesional dalam 30 detik? Claude bisa. 🔥"
     )
-    print(f"\n🎯 Output: {len(paths)} slide")
-    for p in paths:
-        print(f"   {p}")
+    print(f"\n🎯 {len(paths)} slide generated")
+    for p in paths: print(f"   {p}")
