@@ -23,13 +23,13 @@ def get_client() -> Client:
     if not username or not password:
         raise ValueError("IG_USERNAME atau IG_PASSWORD tidak ditemukan di .env")
 
-    # ── PRIORITAS 1: IG_SESSION dari GitHub Secrets (environment variable) ──
+    # ── PRIORITAS 1: IG_SESSION dari GitHub Secrets ──
     session_str = os.getenv("IG_SESSION")
     if session_str:
         try:
             cl.set_settings(json.loads(session_str))
             cl.login(username, password)
-            cl.get_timeline_feed()  # Test apakah session masih valid
+            cl.get_timeline_feed()
             print("✅ Session dari GitHub Secrets berhasil digunakan")
             return cl
         except LoginRequired:
@@ -37,7 +37,7 @@ def get_client() -> Client:
         except Exception as e:
             print(f"⚠️  Session dari Secrets error: {e}, coba login fresh...")
 
-    # ── PRIORITAS 2: Session file lokal (untuk development) ──
+    # ── PRIORITAS 2: Session file lokal ──
     if SESSION_FILE.exists():
         try:
             cl.load_settings(SESSION_FILE)
@@ -57,63 +57,77 @@ def get_client() -> Client:
         print(f"🔐 Login fresh sebagai {username}...")
         cl.login(username, password)
         cl.dump_settings(SESSION_FILE)
-        print("✅ Login berhasil, session disimpan ke file lokal")
+        print("✅ Login berhasil, session disimpan")
         return cl
     except ChallengeRequired:
         print("❌ Instagram minta verifikasi (challenge)")
-        print("   Buka Instagram di HP dan selesaikan verifikasi dulu")
         raise
     except Exception as e:
         print(f"❌ Login gagal: {e}")
         raise
 
 def get_random_post_delay() -> int:
-    """Hitung random delay dalam detik sebelum posting."""
     delay = random.uniform(30, 120)
     print(f"⏱️  Delay {delay:.0f} detik sebelum upload...")
     return int(delay)
 
-def upload_post(image_path: str, caption: str, hashtags: list,
+def upload_post(image_paths, caption: str, hashtags: list,
                 dry_run: bool = False) -> dict:
     """
-    Upload foto ke Instagram.
-    dry_run=True: simulasi tanpa benar-benar posting.
+    Upload ke Instagram. Support single foto dan carousel (list).
+    image_paths: str (single) atau list[str] (carousel)
     """
+    # Normalisasi ke list
+    if isinstance(image_paths, str):
+        paths = [image_paths]
+    else:
+        paths = list(image_paths)
+
+    is_carousel = len(paths) > 1
     full_caption = caption + "\n\n" + " ".join(hashtags)
 
-    print(f"\n📤 Mempersiapkan upload...")
-    print(f"   Image : {Path(image_path).name}")
+    print(f"\n📤 Mempersiapkan upload {'carousel' if is_carousel else 'foto'}...")
+    print(f"   Slide  : {len(paths)}")
     print(f"   Caption: {caption[:60]}...")
     print(f"   Hashtags: {len(hashtags)} tag")
-    print(f"   Total caption: {len(full_caption)} karakter")
 
     if dry_run:
         print(f"\n🧪 DRY RUN MODE — tidak benar-benar posting")
-        print(f"   Caption preview:\n{full_caption[:200]}...")
+        print(f"   Slide paths: {[Path(p).name for p in paths]}")
         return {
             "success": True,
             "dry_run": True,
             "post_id": "dry_run_000",
+            "is_carousel": is_carousel,
+            "slide_count": len(paths),
             "timestamp": datetime.now().isoformat()
         }
 
-    # Delay natural sebelum upload
     time.sleep(get_random_post_delay())
 
     try:
         cl = get_client()
 
-        print(f"📸 Mengupload ke Instagram...")
-        media = cl.photo_upload(
-            path=image_path,
-            caption=full_caption
-        )
+        if is_carousel:
+            print(f"📸 Mengupload carousel {len(paths)} slide ke Instagram...")
+            media = cl.album_upload(
+                paths=paths,
+                caption=full_caption
+            )
+        else:
+            print(f"📸 Mengupload foto ke Instagram...")
+            media = cl.photo_upload(
+                path=paths[0],
+                caption=full_caption
+            )
 
         result = {
             "success": True,
             "dry_run": False,
             "post_id": str(media.pk),
             "post_url": f"https://instagram.com/p/{media.code}/",
+            "is_carousel": is_carousel,
+            "slide_count": len(paths),
             "timestamp": datetime.now().isoformat()
         }
 
@@ -134,14 +148,3 @@ def upload_post(image_path: str, caption: str, hashtags: list,
             "error": str(type(e).__name__),
             "message": str(e)
         }
-
-if __name__ == "__main__":
-    from pathlib import Path
-
-    test_image = str(next(Path("data/images").glob("*.png")))
-    test_caption = "Gemini AI hadir mengubah cara kita bekerja! 🚀\n\nCoba sekarang!"
-    test_hashtags = ["#AI", "#GeminiAI", "#TeknologiIndonesia"]
-
-    print("=== TEST POST ENGINE (DRY RUN) ===\n")
-    result = upload_post(test_image, test_caption, test_hashtags, dry_run=True)
-    print(f"\n🎯 Result: {result}")

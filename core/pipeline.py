@@ -29,6 +29,11 @@ def log_pipeline(post_id: int, stage: str, status: str,
 
 def save_post_draft(data: dict) -> int:
     conn = get_connection()
+    # image_path: simpan sebagai JSON list jika carousel
+    image_path = data.get("image_path", "")
+    if isinstance(image_path, list):
+        image_path = json.dumps(image_path)
+
     cursor = conn.execute("""
         INSERT INTO posts (niche, topic, trend_score, caption, hashtags,
                           image_path, image_prompt, status)
@@ -36,7 +41,7 @@ def save_post_draft(data: dict) -> int:
     """, (
         data["niche"], data["topic"], data.get("trend_score", 0),
         data["caption"], json.dumps(data["hashtags"]),
-        data.get("image_path", ""), data.get("image_prompt", "")
+        image_path, data.get("image_prompt", "")
     ))
     conn.commit()
     post_id = cursor.lastrowid
@@ -102,19 +107,26 @@ def run_pipeline(dry_run: bool = False) -> dict:
         print(f"   💾 Draft disimpan (ID: {post_id})")
         log_pipeline(post_id, "content", "success", duration)
 
-        # ── STEP 3: IMAGE GENERATION ──
-        print("\n📍 STEP 3: Image Generation")
+        # ── STEP 3: IMAGE GENERATION (carousel) ──
+        print("\n📍 STEP 3: Carousel Generation")
         t = datetime.now()
-        image_path = generate_image(
+        image_paths = generate_image(
             content["image_prompt"],
             content["niche"],
             content["topic"],
-            brief=content.get("brief", "")  # ← kirim brief untuk infografis
+            brief=content.get("brief", ""),
+            caption=content.get("caption", "")
         )
-        content["image_path"] = image_path
+        # image_paths adalah list[str]
+        content["image_path"] = image_paths
         duration = (datetime.now() - t).total_seconds()
-        print(f"   ✅ Selesai ({duration:.1f}s)")
-        log_pipeline(post_id, "visual", "success", duration)
+        slide_count = len(image_paths) if isinstance(image_paths, list) else 1
+        print(f"   ✅ Selesai — {slide_count} slide ({duration:.1f}s)")
+        log_pipeline(post_id, "visual", "success", duration,
+                     f"slides={slide_count}")
+
+        # Untuk QA, gunakan slide pertama (cover)
+        qa_image = image_paths[0] if isinstance(image_paths, list) else image_paths
 
         # ── STEP 4: QA ENGINE ──
         print("\n📍 STEP 4: QA Check")
@@ -125,38 +137,38 @@ def run_pipeline(dry_run: bool = False) -> dict:
             qa_result = run_qa(
                 content["niche"], content["topic"],
                 content["caption"], content["hashtags"],
-                content["image_prompt"], image_path
+                content["image_prompt"], qa_image
             )
             duration = (datetime.now() - t).total_seconds()
 
             if qa_result["passed"]:
                 print(f"   ✅ QA PASS (score: {qa_result['overall']:.1f})")
                 log_pipeline(post_id, "qa", "pass", duration,
-                           f"score={qa_result['overall']}")
+                             f"score={qa_result['overall']}")
                 break
             else:
                 print(f"   ❌ QA FAIL (score: {qa_result['overall']:.1f})")
                 log_pipeline(post_id, "qa", "fail", duration,
-                           f"score={qa_result['overall']}")
+                             f"score={qa_result['overall']}")
                 if attempt < max_retries:
                     print(f"   🔄 Regenerate konten...")
                     content = run_content_engine(trend["niche"], trend["topic"])
                     content["trend_score"] = trend["score"]
-                    content["image_path"] = image_path
+                    content["image_path"] = image_paths
 
         if not qa_result or not qa_result["passed"]:
             update_post_status(post_id, "skipped", qa_result["overall"],
-                             error_msg="QA gagal 3x")
+                               error_msg="QA gagal 3x")
             reason = f"QA gagal {max_retries}x (score terakhir: {qa_result['overall']:.1f}/10)"
             print(f"\n⚠️  Pipeline dihentikan — {reason}")
             notify_skip(reason)
             return {"success": False, "reason": "qa_failed", "post_id": post_id}
 
-        # ── STEP 5: POSTING ──
-        print(f"\n📍 STEP 5: Upload ke Instagram")
+        # ── STEP 5: POSTING (carousel) ──
+        print(f"\n📍 STEP 5: Upload Carousel ke Instagram")
         t = datetime.now()
         post_result = upload_post(
-            image_path,
+            image_paths,           # list[str]
             content["caption"],
             content["hashtags"],
             dry_run=dry_run
@@ -173,10 +185,11 @@ def run_pipeline(dry_run: bool = False) -> dict:
             total = (datetime.now() - start_time).total_seconds()
             print(f"\n{'='*55}")
             print(f"✅ PIPELINE SELESAI — {total:.0f} detik")
-            print(f"   Post ID : {post_result.get('post_id')}")
-            print(f"   QA Score: {qa_result['overall']:.1f}/10")
+            print(f"   Post ID  : {post_result.get('post_id')}")
+            print(f"   Slides   : {post_result.get('slide_count')}")
+            print(f"   QA Score : {qa_result['overall']:.1f}/10")
             if not dry_run:
-                print(f"   URL     : {post_result.get('post_url')}")
+                print(f"   URL      : {post_result.get('post_url')}")
             print(f"{'='*55}")
 
             notify_success(
@@ -189,9 +202,9 @@ def run_pipeline(dry_run: bool = False) -> dict:
 
         else:
             update_post_status(post_id, "failed",
-                             error_msg=post_result.get("message"))
+                               error_msg=post_result.get("message"))
             log_pipeline(post_id, "post", "fail", duration,
-                        post_result.get("message"))
+                         post_result.get("message"))
             msg = post_result.get("message", "unknown error")
             print(f"\n❌ Upload gagal: {msg}")
             notify_fail(reason=msg, stage="upload")
