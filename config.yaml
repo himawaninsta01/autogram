@@ -30,7 +30,7 @@ content:
 image:
   width: 1080
   height: 1080
-  comfyui_url: "http://localhost:8188"
+  api_provider: "pollinations.ai"  # FREE CLOUD SERVERLESS API
   style_map:
     teknologi: "futuristic digital art, clean minimalist"
     AI: "neural network visualization, tech aesthetic"

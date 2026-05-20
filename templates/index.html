@@ -1,0 +1,2669 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoSEO Enterprise — Multi-Mitra SEO & Social Suite</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Apple Design System & Premium Multi-Theme Aesthetics */
+    :root {
+      /* Theme color accents */
+      --accent-rgb: 42, 67, 45; 
+      --accent-rgb-2: 74, 122, 77;
+      
+      --color-primary: rgb(var(--accent-rgb));
+      --color-secondary: rgb(var(--accent-rgb-2));
+      
+      /* Theme backgrounds & surfaces */
+      --color-bg: #f5f5f7;
+      --color-dark: #1d1d1f;
+      --color-text-secondary: #86868b;
+      
+      --color-card-bg: rgba(255, 255, 255, 0.8);
+      --color-card-border: rgba(0, 0, 0, 0.06);
+      --color-card-hover-border: rgba(var(--accent-rgb-2), 0.15);
+      --color-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.015);
+      --color-card-hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+      
+      --color-header-bg: rgba(255, 255, 255, 0.75);
+      --color-header-border: rgba(0, 0, 0, 0.06);
+      
+      --color-select-bg: rgba(0, 0, 0, 0.04);
+      --color-select-border: rgba(0, 0, 0, 0.06);
+      
+      --color-capsule-bg: rgba(255, 255, 255, 0.85);
+      --color-capsule-border: rgba(0, 0, 0, 0.05);
+      --color-capsule-divider: rgba(0, 0, 0, 0.08);
+      
+      --color-log-entry-bg: #ffffff;
+      --color-log-entry-border: rgba(0, 0, 0, 0.04);
+      
+      --color-tab-bg: rgba(0, 0, 0, 0.05);
+      --color-tab-active-bg: #ffffff;
+      --color-tab-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02);
+      
+      --color-input-bg: #fafafa;
+      --color-input-border: rgba(0, 0, 0, 0.08);
+      
+      --color-preview-bg: #ffffff;
+      --color-preview-border: rgba(0, 0, 0, 0.06);
+      
+      --color-spinner-bg: rgba(255, 255, 255, 0.85);
+      
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-full: 9999px;
+      
+      --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+      background-color: var(--color-bg);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(var(--accent-rgb), 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(var(--accent-rgb-2), 0.08) 0%, transparent 40%);
+      color: var(--color-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--color-dark);
+      transition: color 0.3s ease;
+    }
+
+    /* Apple Premium Glassmorphic Panel Card */
+    .glass-card {
+      background: var(--color-card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--color-card-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--color-card-shadow);
+      transition: var(--transition-smooth);
+    }
+    
+    .glass-card:hover {
+      border-color: var(--color-card-hover-border);
+      box-shadow: var(--color-card-hover-shadow);
+      transform: translateY(-1px);
+    }
+
+    /* Header & Navigation Styling */
+    header {
+      border-bottom: 1px solid var(--color-header-border);
+      background: var(--color-header-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: var(--transition-smooth);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: white;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.15);
+      font-family: 'Outfit', sans-serif;
+      transition: var(--transition-smooth);
+    }
+
+    .logo-text h1 {
+      font-size: 1.3rem;
+      color: var(--color-dark);
+      transition: color 0.3s ease;
+    }
+    .logo-text p {
+      font-size: 0.7rem;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: color 0.3s ease;
+    }
+
+    /* Partner Swapper dropdown */
+    .partner-selector-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select.partner-select {
+      background: var(--color-select-bg);
+      border: 1px solid var(--color-select-border);
+      color: var(--color-dark);
+      padding: 8px 16px;
+      border-radius: 980px; /* Apple Style */
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    select.partner-select:hover {
+      background: rgba(0, 0, 0, 0.07);
+      border-color: var(--color-card-hover-border);
+    }
+
+    /* Main Content Layout Grid */
+    main {
+      max-width: 1400px;
+      margin: 32px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 1024px) {
+      main {
+        grid-template-columns: 350px 1fr;
+      }
+    }
+
+    /* Left Sidebar: Controls & Actions */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Metrics Capsule Styling */
+    .metrics-capsule {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 16px 24px;
+      border-radius: var(--radius-full);
+      background: var(--color-capsule-bg);
+      border: 1px solid var(--color-capsule-border);
+      box-shadow: var(--color-card-shadow);
+      margin-bottom: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: var(--transition-smooth);
+    }
+
+    .metrics-capsule:hover {
+      border-color: var(--color-card-hover-border);
+      box-shadow: var(--color-card-hover-shadow);
+    }
+
+    .capsule-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 4px 12px;
+    }
+
+    .capsule-item .metric-val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      color: var(--color-dark);
+      margin-bottom: 2px;
+      line-height: 1.15;
+      transition: color 0.3s ease;
+    }
+
+    .capsule-item .metric-label {
+      font-size: 0.68rem;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .capsule-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--color-capsule-divider);
+      flex-shrink: 0;
+      transition: background-color 0.3s ease;
+    }
+
+    @media (max-width: 600px) {
+      .metrics-capsule {
+        flex-direction: column;
+        border-radius: var(--radius-md);
+        gap: 12px;
+        padding: 20px;
+      }
+      .capsule-divider {
+        width: 100%;
+        height: 1px;
+      }
+    }
+
+    /* Apple Pill Buttons styling */
+    .btn {
+      background: var(--color-primary); /* Dynamic accent background */
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 980px; /* macOS button radius */
+      font-weight: 500;
+      font-size: 0.92rem;
+      font-family: -apple-system, sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      text-decoration: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: var(--transition-smooth);
+      outline: none;
+    }
+
+    .btn:hover {
+      background: var(--color-secondary); /* Dynamic accent hover */
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.15);
+    }
+
+    .btn-secondary {
+      background: var(--color-select-bg);
+      border: 1px solid var(--color-select-border);
+      color: var(--color-primary);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 0, 0, 0.07);
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .btn-publish {
+      background: #34c759; /* Apple Green */
+      border: none;
+    }
+    
+    .btn-publish:hover {
+      background: #30d158;
+      box-shadow: 0 4px 15px rgba(52, 199, 89, 0.15);
+    }
+
+    /* Pipeline Logs Bullet List Style (Apple Clean Style) */
+    .log-console {
+      max-height: 280px;
+      overflow-y: auto;
+      background: transparent;
+      border: none;
+      padding: 2px;
+      list-style: none;
+      font-size: 0.88rem;
+      color: var(--color-dark);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: color 0.3s ease;
+    }
+
+    .log-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--color-log-entry-bg);
+      border: 1px solid var(--color-log-entry-border);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      line-height: 1.4;
+      transition: var(--transition-smooth);
+    }
+
+    .log-entry:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      border-color: var(--color-card-hover-border);
+    }
+
+    .log-bullet {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #86868b;
+      margin-top: 4px;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .log-bullet.success { background: #34c759; box-shadow: 0 0 4px rgba(52, 199, 89, 0.3); } /* Apple Green */
+    .log-bullet.failed { background: #ff3b30; box-shadow: 0 0 4px rgba(255, 59, 48, 0.3); } /* Apple Red */
+    .log-bullet.info { background: var(--color-primary); box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.3); } /* Dynamic Brand */
+    .log-bullet.change { background: #af52de; box-shadow: 0 0 4px rgba(175, 82, 222, 0.3); } /* Apple Purple */
+
+    .log-time {
+      color: var(--color-text-secondary);
+      font-weight: 500;
+      margin-right: 6px;
+      font-size: 0.8rem;
+      transition: color 0.3s ease;
+    }
+
+    .log-stage {
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin-right: 6px;
+      background: var(--color-select-bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: var(--transition-smooth);
+    }
+
+    /* Segmented Tab Nav (Apple macOS style) */
+    .tabs-nav {
+      display: flex;
+      width: 100%;
+      background: var(--color-tab-bg);
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      gap: 2px;
+      border: 1px solid rgba(0, 0, 0, 0.02);
+      transition: var(--transition-smooth);
+      box-sizing: border-box;
+      overflow-x: auto;
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    
+    .tabs-nav::-webkit-scrollbar {
+      display: none;             /* Chrome, Safari and Opera */
+    }
+
+    .tab-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 18px;
+      color: var(--color-text-secondary);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Outfit", sans-serif;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-radius: 7px;
+      transition: var(--transition-smooth);
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-dark);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-btn.active {
+      color: var(--color-dark);
+      background: var(--color-tab-active-bg);
+      box-shadow: var(--color-tab-active-shadow);
+      font-weight: 600;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Workspace Content Area */
+    .workspace-area {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Analytics Dashboard Graphs Grid */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .analytics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .chart-container {
+      position: relative;
+      height: 320px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.01);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+
+    /* Studio: Markdown Editor & Preview */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      height: 600px;
+    }
+
+    @media (min-width: 992px) {
+      .studio-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .editor-pane, .preview-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .editor-pane textarea {
+      flex: 1;
+      background: var(--color-input-bg);
+      border: 1px solid var(--color-input-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-dark);
+      padding: 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      resize: none;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .editor-pane textarea:focus {
+      border-color: var(--color-card-hover-border);
+      background: var(--color-preview-bg);
+    }
+
+    .preview-scroll {
+      flex: 1;
+      background: var(--color-preview-bg);
+      color: var(--color-dark);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      overflow-y: auto;
+      border: 1px solid var(--color-preview-border);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+      transition: var(--transition-smooth);
+    }
+    
+    /* Blog website styling simulation */
+    .blog-preview-style h1, .blog-preview-style h2, .blog-preview-style h3 {
+      color: var(--color-primary);
+      font-family: 'Outfit', sans-serif;
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      transition: color 0.3s ease;
+    }
+    .blog-preview-style h2 {
+      border-bottom: 1px solid var(--color-card-border);
+      padding-bottom: 6px;
+      font-size: 1.4rem;
+    }
+    .blog-preview-style p {
+      margin-bottom: 1em;
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+    .blog-preview-style ul, .blog-preview-style ol {
+      margin-left: 20px;
+      margin-bottom: 1em;
+    }
+    .blog-preview-style li {
+      margin-bottom: 0.4em;
+    }
+
+    /* Instagram Slide Carousel Visualizer */
+    .slide-visualizer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slide-container {
+      width: 100%;
+      max-width: 520px;
+      aspect-ratio: 1/1;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--color-preview-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      position: relative;
+      background: var(--color-input-bg);
+      transition: var(--transition-smooth);
+    }
+
+    .slide-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .slide-container img.active {
+      display: block;
+      animation: fadeEffect 0.3s ease;
+    }
+
+    @keyframes fadeEffect {
+      from { opacity: 0.5; }
+      to { opacity: 1; }
+    }
+
+    .carousel-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .carousel-indicator {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      transition: color 0.3s ease;
+    }
+
+    /* Article List Table styling */
+    .article-table-container {
+      overflow-x: auto;
+    }
+
+    table.article-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    table.article-table th, table.article-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--color-card-border);
+      transition: var(--transition-smooth);
+    }
+
+    table.article-table th {
+      color: var(--color-text-secondary);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    table.article-table td {
+      color: var(--color-dark);
+    }
+
+    table.article-table tr:hover td {
+      background: var(--color-select-bg);
+    }
+
+    .badge-status {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+    }
+
+    .status-draft {
+      background: rgba(255, 149, 0, 0.1);
+      color: #ff9500;
+      border: 1px solid rgba(255, 149, 0, 0.2);
+    }
+
+    .status-published {
+      background: rgba(52, 199, 89, 0.1);
+      color: #34c759;
+      border: 1px solid rgba(52, 199, 89, 0.2);
+    }
+
+    /* Modal / Form fields styling */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group label {
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .input-field {
+      background: var(--color-input-bg);
+      border: 1px solid var(--color-input-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-dark);
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .input-field:focus {
+      border-color: var(--color-card-hover-border);
+      background: var(--color-preview-bg);
+    }
+
+    /* Loading Spinner Overlay */
+    .spinner-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--color-spinner-bg);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      transition: var(--transition-smooth);
+    }
+    
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--color-card-border);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+      transition: border-color 0.3s ease;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .spinner-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-dark);
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Spinner -->
+  <div class="spinner-overlay" id="loadingSpinner">
+    <div class="spinner"></div>
+    <div class="spinner-text" id="spinnerText">Mengeksekusi Pipa SEO...</div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <div class="logo-area">
+        <div class="logo-badge" id="headerLogoBadge">D</div>
+        <div class="logo-text">
+          <h1 id="headerPartnerName">Dua Garis Landscape</h1>
+          <p>AutoSEO Enterprise Suite</p>
+        </div>
+      </div>
+      
+      <!-- Partner & Theme Selector Dropdowns -->
+      <div class="partner-selector-box">
+        <div style="display: flex; align-items: center; gap: 8px; margin-right: 16px;">
+          <span style="font-size: 0.85rem; color: var(--color-text-secondary); font-weight: 500;">Tema UI:</span>
+          <select class="partner-select" id="themeSelector" onchange="changeThemePalette(this.value)">
+            <option value="brand">✨ Mitra Bawaan</option>
+            <option value="forest">🌲 Eco Forest</option>
+            <option value="royal">🔮 Royal Indigo</option>
+            <option value="sunset">🌅 Sunset Gold</option>
+            <option value="midnight">🕶️ Midnight Onyx</option>
+            <option value="teal">🌊 Aura Teal</option>
+          </select>
+        </div>
+        <span style="font-size: 0.85rem; color: var(--color-text-secondary); font-weight: 500;">Mitra Aktif:</span>
+        <select class="partner-select" id="partnerSwapper" onchange="switchPartner(this.value)">
+          <!-- Options populated by JS -->
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <main>
+    
+    <!-- Left Column: Quick Stats & Controls -->
+    <section class="sidebar">
+      
+      <!-- Partner Profile card -->
+      <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+        <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--color-card-border); padding-bottom: 8px;">
+          Profil Kemitraan
+        </h3>
+        <div style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <span style="color: var(--color-text-secondary);">Website:</span> 
+            <a href="#" id="sidebarWebsiteUrl" target="_blank" style="color: var(--color-primary); text-decoration: none; font-weight: 600; transition: var(--transition-smooth);">url</a>
+          </div>
+          <div>
+            <span style="color: var(--color-text-secondary);">Instagram:</span> 
+            <span id="sidebarIgUsername" style="color: var(--color-dark); font-weight: 500;">@ig</span>
+          </div>
+          <div>
+            <span style="color: var(--color-text-secondary);">Niche Utama:</span>
+            <div id="sidebarNicheBadges" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;">
+              <!-- Badges via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Manual Execution Triggers -->
+      <div class="glass-card" style="display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--color-card-border); padding-bottom: 8px;">
+          Pengendali Pipa
+        </h3>
+        <button class="btn" onclick="runPipeline('seo')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          Lacak Ranking Google
+        </button>
+        <button class="btn" onclick="runPipeline('social')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"/></svg>
+          Crawler Instagram
+        </button>
+        <button class="btn" onclick="runPipeline('trend')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Riset Tren Viral AI
+        </button>
+        <button class="btn" onclick="runPipeline('blog')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          Tulis Draf Artikel
+        </button>
+        <button class="btn" onclick="runPipeline('visual')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Render Slide Instagram
+        </button>
+      </div>
+
+      <!-- Pipeline Logs Console in Bullet List Format -->
+      <div class="glass-card" style="display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--color-card-border); padding-bottom: 8px;">
+          Log Konsol Pipeline
+        </h3>
+        <ul class="log-console" id="logConsole">
+          <li class="log-entry">
+            <span class="log-bullet info"></span>
+            <div>
+              <span class="log-time">10:58:08</span>
+              <span class="log-stage">[SYS]</span>
+              <span>Menghubungkan ke AutoSEO Enterprise Core...</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- Right Column: Interactive Workspace & Tabs -->
+    <section class="workspace-area">
+      
+      <!-- Workspace Navigation Tabs -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab(this, 'analytics')">Monitor & Analitik</button>
+        <button class="tab-btn" onclick="switchTab(this, 'blog-studio')">Studio Penulisan Blog</button>
+        <button class="tab-btn" onclick="switchTab(this, 'visual-studio')">Instagram Visuals</button>
+        <button class="tab-btn" onclick="switchTab(this, 'settings')">Penjadwalan & Konfigurasi</button>
+        <button class="tab-btn" onclick="switchTab(this, 'guide')">📖 Panduan Penggunaan</button>
+      </div>
+
+      <!-- TAB 1: Analytics & Monitor -->
+      <div class="tab-content active" id="tab-analytics">
+        <div class="workspace-area">
+          
+          <!-- Metrics Capsule Bar -->
+          <div class="glass-card metrics-capsule">
+            <div class="capsule-item">
+              <div class="metric-val" id="metricFollowers">0</div>
+              <div class="metric-label">Followers</div>
+            </div>
+            <div class="capsule-divider"></div>
+            <div class="capsule-item">
+              <div class="metric-val" id="metricEngagement">0.0%</div>
+              <div class="metric-label">Engagement</div>
+            </div>
+            <div class="capsule-divider"></div>
+            <div class="capsule-item">
+              <div class="metric-val" id="metricAvgSeo">#0</div>
+              <div class="metric-label">Avg. Rank</div>
+            </div>
+            <div class="capsule-divider"></div>
+            <div class="capsule-item">
+              <div class="metric-val" id="metricPosts">0</div>
+              <div class="metric-label">Total Posts</div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <h2 style="font-size: 1.25rem; margin-bottom: 20px;">Pertumbuhan Organik SEO (Peringkat Kata Kunci Google)</h2>
+            <div class="chart-container">
+              <canvas id="seoRankChart"></canvas>
+            </div>
+          </div>
+
+          <div class="analytics-grid">
+            <div class="glass-card">
+              <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Pertumbuhan Follower Instagram</h3>
+              <div class="chart-container" style="height: 240px;">
+                <canvas id="igFollowersChart"></canvas>
+              </div>
+            </div>
+            
+            <div class="glass-card">
+              <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Kurva Engagement Rate (%)</h3>
+              <div class="chart-container" style="height: 240px;">
+                <canvas id="igEngagementChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 2: Blog Studio -->
+      <div class="tab-content" id="tab-blog-studio">
+        <div class="workspace-area">
+          
+          <!-- Articles Manager: List & Action -->
+          <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--color-card-border); padding-bottom: 12px;">
+              <h2 style="font-size: 1.25rem;">Pengelola Artikel Blog</h2>
+              <button class="btn btn-secondary" style="width: auto; padding: 6px 16px; font-size: 0.85rem;" onclick="createNewArticle()">
+                + Buat Artikel Baru
+              </button>
+            </div>
+            
+            <div class="article-table-container">
+              <table class="article-table" id="articlesTable">
+                <thead>
+                  <tr>
+                    <th>Judul Artikel</th>
+                    <th>Kategori</th>
+                    <th>Waktu Baca</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="articlesTableBody">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Studio Editor Frame (hidden by default until click edit) -->
+          <div class="glass-card" id="articleEditorFrame" style="display: none; flex-direction: column; gap: 20px;">
+            <h2 style="font-size: 1.2rem; border-bottom: 1px solid var(--color-card-border); padding-bottom: 8px;" id="editorTitleLabel">
+              Editor Artikel: Draf Baru
+            </h2>
+            
+            <!-- Metadata inputs -->
+            <input type="hidden" id="editArticleId">
+            <input type="hidden" id="editArticleSlug">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="field-group">
+                <label>Judul Artikel</label>
+                <input type="text" class="input-field" id="editTitle" placeholder="5 Tips Merawat Rumput..." oninput="updateLivePreview()">
+              </div>
+              <div class="field-group">
+                <label>Kategori</label>
+                <input type="text" class="input-field" id="editCategory" placeholder="Panduan Perawatan" oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="field-group">
+                <label>Image URL</label>
+                <input type="text" class="input-field" id="editImageUrl" placeholder="https://..." oninput="updateLivePreview()">
+              </div>
+              <div class="field-group">
+                <label>Tags (Pisahkan Koma)</label>
+                <input type="text" class="input-field" id="editTags" placeholder="rumput, taman, tips" oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>Kutipan Pendek (Excerpt)</label>
+              <input type="text" class="input-field" id="editExcerpt" placeholder="Ringkasan singkat artikel dalam 1 kalimat..." oninput="updateLivePreview()">
+            </div>
+
+            <!-- E-E-A-T Fakta Lapangan Centaur AI Engine -->
+            <div class="glass-card" style="background: rgba(var(--accent-rgb), 0.02); border-color: rgba(var(--accent-rgb-2), 0.15); display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+              <div class="field-group">
+                <label style="font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 8px;">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 113.536 0V21h2v-2.757a5.002 5.002 0 011.663-3.757z"/></svg>
+                  Fakta Lapangan & Pengalaman Proyek Nyata (E-E-A-T)
+                </label>
+                <textarea class="input-field" id="editRealExperience" style="height: 76px; font-family: inherit; font-size: 0.9rem; resize: vertical; padding: 12px;" placeholder="Contoh: Menanam rumput jepang di BSD saat cuaca berangin, diberi pasir split agar tidak menggenang."></textarea>
+              </div>
+              <button class="btn" style="width: auto; align-self: flex-start;" onclick="enrichStoryWithAI()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.594 15.15a2 2 0 01-1.18-3.099l2.84-4.26a2 2 0 012.396-.757l3.243 1.218a2 2 0 001.397.02l2.91-1.092a2 2 0 012.56 1.776v4.619a2 2 0 01-.732 1.547z"/></svg>
+                💡 Kembangkan Narasi dengan AI
+              </button>
+            </div>
+
+            <div class="studio-grid">
+              
+              <!-- Left side: Markdown Text area -->
+              <div class="editor-pane">
+                <label style="font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 600;">Konten Markdown</label>
+                <textarea id="editContent" placeholder="## Masukkan sub-judul di sini..." oninput="updateLivePreview()"></textarea>
+              </div>
+
+              <!-- Right side: Live Preview -->
+              <div class="preview-pane">
+                <label style="font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 600;">Pratinjau Live Website (Simulasi CSS)</label>
+                <div class="preview-scroll blog-preview-style" id="livePreviewContainer">
+                  <!-- HTML Rendered on input -->
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px;">
+              <button class="btn btn-secondary" style="width: auto;" onclick="closeArticleEditor()">Tutup</button>
+              <button class="btn" style="width: auto;" onclick="saveDraft()">Simpan Draf</button>
+              <button class="btn btn-publish" style="width: auto;" id="btnPublishLive" onclick="publishLive()">
+                Terbitkan Live ke Supabase
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 3: Visual Studio -->
+      <div class="tab-content" id="tab-visual-studio">
+        <div class="workspace-area" style="align-items: center;">
+          
+          <div class="glass-card" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px;">
+            <div style="text-align: center;">
+              <h2 style="font-size: 1.3rem; margin-bottom: 6px;">Instagram Carousel Slide Visualizer</h2>
+              <p style="font-size: 0.85rem; color: var(--color-text-secondary);">Slides beresolusi 1080x1080 terkomposit layer transparan sekelas enterprise</p>
+            </div>
+            
+            <div class="slide-visualizer">
+              <div class="slide-container" id="carouselSlideContainer">
+                <div style="color: var(--color-text-secondary); position: absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding: 20px;" id="noSlidesPlaceholder">
+                  Tidak ada gambar pratinjau slide.<br>Klik tombol "Render Slide Instagram" untuk men-generate carousel.
+                </div>
+                <!-- Images dynamically appended by JS -->
+              </div>
+              
+              <div class="carousel-nav" id="carouselNavBox" style="display: none;">
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 16px;" onclick="prevSlide()">← Prev</button>
+                <span class="carousel-indicator" id="carouselIndicator">1 / 7</span>
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 16px;" onclick="nextSlide()">Next →</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 4: Scheduler & Configuration Control -->
+      <div class="tab-content" id="tab-settings">
+        <div class="workspace-area">
+          
+          <!-- Top Banner Alert for Google Rank Drop Warning -->
+          <div class="glass-card" id="rankDropAlert" style="display: none; background: rgba(255, 59, 48, 0.08); border-color: rgba(255, 59, 48, 0.25); padding: 16px 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.5rem;">⚠️</span>
+              <div>
+                <h4 style="color: #ff3b30; font-size: 0.95rem; font-weight: 700; margin-bottom: 2px;">Fluktuasi Algoritma Google Terdeteksi</h4>
+                <p style="font-size: 0.82rem; color: var(--color-dark); opacity: 0.85; margin-bottom: 0;">
+                  Rata-rata peringkat kata kunci Google untuk mitra ini mengalami penurunan. Kami merekomendasikan re-optimasi konten lama menggunakan modul <b>Algorithmic Adaptability</b>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 1: Scheduler Next Post Countdown & Scheduler Config Form -->
+          <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
+              
+              <!-- Countdown Glass Card -->
+              <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px; background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.02), rgba(var(--accent-rgb-2), 0.06));">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 style="font-size: 1.15rem; color: var(--color-primary); margin: 0;">⏰ Status Otomasi Penjadwal</h3>
+                  <span class="badge-status status-published" id="schedulerBadge" style="background: rgba(52,199,89,0.12); color:#34c759; margin: 0;">Aktif</span>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 20px; padding: 12px 0;">
+                  <div style="background: var(--color-capsule-bg); border: 1px solid var(--color-capsule-border); width: 72px; height: 72px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                    🤖
+                  </div>
+                  <div>
+                    <p style="font-size: 0.8rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 4px;">Postingan Otomatis Berikutnya</p>
+                    <h2 style="font-size: 1.8rem; font-weight: 800; font-family: 'Outfit', sans-serif; margin-bottom: 2px;" id="schedulerCountdown">-- Jam -- Menit</h2>
+                    <p style="font-size: 0.82rem; color: var(--color-text-secondary); margin-bottom: 0;" id="schedulerNextRunDate">Menghitung...</p>
+                  </div>
+                </div>
+                
+                <div style="border-top: 1px solid var(--color-card-border); padding-top: 12px; font-size: 0.82rem; color: var(--color-text-secondary);">
+                  Dihitung secara matematis dari waktu eksekusi terakhir: <b id="schedulerLastRun" style="color: var(--color-dark);">--</b>
+                </div>
+              </div>
+
+              <!-- Scheduler Config Form Card -->
+              <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--color-card-border); padding-bottom: 8px; margin: 0;">
+                  Konfigurasi Durasi Interval Posting
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="field-group">
+                    <label>Minimum Interval (Jam)</label>
+                    <input type="number" class="input-field" id="schedMinHours" min="1" max="168" value="44">
+                  </div>
+                  <div class="field-group">
+                    <label>Maksimum Interval (Jam)</label>
+                    <input type="number" class="input-field" id="schedMaxHours" min="1" max="168" value="52">
+                  </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <label style="font-size: 0.8rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Jendela Engagement Waktu Posting Aktif (WIB)</label>
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+                    <span style="background: rgba(var(--accent-rgb-2), 0.1); color: var(--color-secondary); padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 600;">🌅 Pagi (07:00 - 09:00)</span>
+                    <span style="background: rgba(var(--accent-rgb-2), 0.1); color: var(--color-secondary); padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 600;">☀️ Siang (11:00 - 13:00)</span>
+                    <span style="background: rgba(var(--accent-rgb-2), 0.1); color: var(--color-secondary); padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 600;">🌌 Malam (19:00 - 22:00)</span>
+                  </div>
+                </div>
+
+                <button class="btn" style="width: auto; align-self: flex-end; margin-top: 8px;" onclick="updateSchedulerConfig()">
+                  Simpan Konfigurasi Penjadwal
+                </button>
+              </div>
+
+              <!-- Customer Management Card (Multi-Tenant) -->
+              <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--color-card-border); padding-bottom: 8px; margin: 0;">
+                  Manajemen Kostumer (Kredensial Dinamis)
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: -8px;">
+                  Atur kredensial Instagram klien agar mesin memposting ke akun yang benar (Tanpa merubah file .env).
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+                  <div class="field-group">
+                    <label>ID Mitra (Pilih Mitra)</label>
+                    <select class="input-field" id="partnerSelectManage" onchange="loadPartnerCredentials()">
+                      <option value="duagaris">Dua Garis Landscape</option>
+                      <option value="superchronos">Superchronos AI</option>
+                    </select>
+                  </div>
+                  <div class="field-group">
+                    <label>Username Instagram</label>
+                    <input type="text" class="input-field" id="partnerIgUsername" placeholder="cth: duagarislandscape">
+                  </div>
+                  <div class="field-group">
+                    <label>Password Instagram (Enkripsi DB)</label>
+                    <input type="password" class="input-field" id="partnerIgPassword" placeholder="Biarkan kosong jika tidak diubah">
+                  </div>
+                </div>
+                
+                <button class="btn btn-secondary" style="width: auto; align-self: flex-end; margin-top: 8px;" onclick="savePartnerCredentials()">
+                  💾 Simpan Kredensial IG
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Row 2: Niche & Target Keywords Manager -->
+          <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-card-border); padding-bottom: 12px;">
+              <div>
+                <h3 style="font-size: 1.15rem; color: var(--color-primary); margin: 0;">🎯 Kolektor Tren Lokal & Kata Kunci</h3>
+                <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin: 4px 0 0 0;">Manajemen kata kunci ekor-panjang aktif untuk mendongkrak visibilitas Google Indonesia</p>
+              </div>
+              <button class="btn btn-secondary" style="width: auto; padding: 6px 16px; font-size: 0.85rem;" onclick="openAddNicheModal()">
+                + Tambah Kata Kunci
+              </button>
+            </div>
+            
+            <div class="article-table-container">
+              <table class="article-table">
+                <thead>
+                  <tr>
+                    <th>Kata Kunci / Niche Tren</th>
+                    <th>Skema Visual Default</th>
+                    <th>Tingkat Prioritas (1-10)</th>
+                    <th>Status Aktivasi</th>
+                  </tr>
+                </thead>
+                <tbody id="nichesTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 5: Guide / Panduan Penggunaan -->
+      <div class="tab-content" id="tab-guide">
+        <div class="workspace-area">
+          
+          <!-- Hero / Pengantar Card -->
+          <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px; background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.03), rgba(var(--accent-rgb-2), 0.08));">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="background: var(--color-capsule-bg); border: 1px solid var(--color-capsule-border); width: 64px; height: 64px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                📖
+              </div>
+              <div>
+                <h2 style="font-size: 1.4rem; color: var(--color-primary); margin: 0;">Panduan Pengoperasian AutoSEO Enterprise</h2>
+                <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 4px;">
+                  Optimalkan Sinergi Kecerdasan Buatan dan Fakta Lapangan Manusia (Centaur AI Engine) untuk Mendominasi SEO & Media Sosial
+                </p>
+              </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--color-dark); opacity: 0.85; line-height: 1.6; border-top: 1px solid var(--color-card-border); padding-top: 16px; margin: 0;">
+              Selamat datang di dasbor <b>AutoSEO Enterprise</b>! Sistem ini dirancang dengan pendekatan <b>Centaur AI (Human-in-the-Loop)</b>. Kami percaya bahwa otomasi murni tanpa sentuhan manusia akan kalah bersaing di era pencarian modern. Dengan platform ini, Anda berperan memberikan sentuhan emosi, keahlian, dan fakta nyata di lapangan (E-E-A-T), sementara AI menyusun struktur, optimasi teknis, dan merender konten multimedia berkinerja tinggi secara otomatis.
+            </p>
+          </div>
+
+          <!-- Main Guide Grid -->
+          <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
+            
+            <!-- Section 1: Dashboard & Metrics -->
+            <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+              <h3 style="font-size: 1.15rem; color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <span>📈</span> Modul 1: Monitor & Analitik Organik
+              </h3>
+              <div style="font-size: 0.9rem; color: var(--color-dark); opacity: 0.85; line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
+                <p>Panel utama ini melacak kesehatan digital kemitraan Anda secara real-time:</p>
+                <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                  <li><b>Followers &amp; Engagement:</b> Mengukur pertumbuhan audiens Instagram dan tingkat interaksi (like/comment) dari crawler otomatis.</li>
+                  <li><b>Avg. Rank (Peringkat Rata-rata):</b> Posisi rata-rata seluruh kata kunci target Anda di halaman pencarian Google Indonesia. Angka lebih kecil (misal: #1) menandakan dominasi peringkat atas.</li>
+                  <li><b>Kurva Pertumbuhan Real-Time:</b> Chart interaktif menampilkan data historis peringkat SEO dan performa sosial media.</li>
+                  <li>
+                    <span style="color: #ff3b30; font-weight: 600;">🚨 Deteksi Penurunan Peringkat (Google Rank Drop Alert):</span> 
+                    Sistem memantau pergerakan algoritma. Jika peringkat merosot secara historis, banner peringatan darurat berwarna merah transparan akan otomatis aktif di tab <b>Penjadwalan &amp; Konfigurasi</b> untuk menyarankan optimalisasi ulang konten.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Section 2: Blog Studio & EEAT -->
+            <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+              <h3 style="font-size: 1.15rem; color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <span>✍️</span> Modul 2: Studio Penulisan Blog (E-E-A-T)
+              </h3>
+              <div style="font-size: 0.9rem; color: var(--color-dark); opacity: 0.85; line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
+                <p>
+                  Mesin pencari modern seperti Google mengutamakan konten yang memiliki <b>E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness)</b>.
+                </p>
+                <div style="background: rgba(var(--accent-rgb-2), 0.05); border: 1px dashed rgba(var(--accent-rgb-2), 0.2); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 8px;">
+                  <b>Alur Penggunaan Fitur Centaur:</b>
+                  <ol style="padding-left: 20px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px;">
+                    <li>Pilih draf artikel atau klik <b>"+ Buat Artikel Baru"</b>.</li>
+                    <li>Tulis informasi mentah, studi kasus, atau temuan nyata Anda di kolom <b>"Fakta Lapangan &amp; Pengalaman Proyek Nyata (E-E-A-T)"</b>.</li>
+                    <li>Klik tombol <b>"💡 Kembangkan Narasi dengan AI"</b>. AI akan memadukan fakta mentah tersebut dengan teknik copywriting premium, menyisipkan emosi, dan merumuskan konten artikel berformat Markdown lengkap dengan metadatanya secara instan.</li>
+                    <li>Periksa hasil pada <b>Pratinjau Live Website</b>, sesuaikan teks, lalu klik <b>"Simpan Draf"</b> atau langsung publikasikan ke <b>Supabase Live</b>.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Instagram Visuals -->
+            <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+              <h3 style="font-size: 1.15rem; color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <span>🎨</span> Modul 3: Instagram Visuals &amp; Pillow Slides
+              </h3>
+              <div style="font-size: 0.9rem; color: var(--color-dark); opacity: 0.85; line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
+                <p>
+                  Meningkatkan konversi web memerlukan sinergi visual sosial media. Modul ini menyajikan visualizer slide carousel Instagram:
+                </p>
+                <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                  <li><b>Komposit Layer Profesional:</b> Sistem merender slide beresolusi 1080x1080 secara dinamis menggunakan Pillow Engine, menyisipkan aset grafis, logo mitra, dan palet warna yang harmonis.</li>
+                  <li><b>Slide Viewer:</b> Klik tombol <b>"Render Slide Instagram"</b> pada pengendali pipa di panel kiri untuk membuat gambar slide baru, lalu telusuri urutan slide menggunakan tombol <i>Prev / Next</i> di tab ini untuk mengoreksi komposisi visual sebelum posting.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Section 4: Scheduler & Keywords -->
+            <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+              <h3 style="font-size: 1.15rem; color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <span>⚙️</span> Modul 4: Penjadwalan &amp; Kolektor Tren Lokal
+              </h3>
+              <div style="font-size: 0.9rem; color: var(--color-dark); opacity: 0.85; line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
+                <p>Mengatur ritme publikasi otomatis dan mengumpulkan target pencarian ekor-panjang lokal:</p>
+                <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                  <li><b>Interval Posting Dinamis:</b> Tentukan jam minimum dan maksimum antar-postingan untuk memperbarui file <code>config.yaml</code>. Sistem akan mengacak jeda posting di rentang tersebut agar tampak organik bagi mesin pencari.</li>
+                  <li><b>Jendela Engagement WIB:</b> Sistem secara otomatis memprioritaskan penerbitan pada jam-jam prima interaksi Indonesia (Pagi, Siang, dan Malam).</li>
+                  <li><b>Kolektor Tren &amp; Kata Kunci:</b> Kelola target kata kunci lokal spesifik (niche). Tambahkan tren pencarian mikro baru (misal: <i>"rumput jepang bsd"</i>), atur tingkat prioritas (1-10), dan pilih gaya visual default canvas untuk memandu arah riset AI berikutnya.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Section 5: Pipeline Controller -->
+            <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+              <h3 style="font-size: 1.15rem; color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <span>🚀</span> Panduan Operasi Manual (Pengendali Pipa)
+              </h3>
+              <p style="font-size: 0.9rem; color: var(--color-dark); opacity: 0.85; line-height: 1.6; margin: 0;">
+                Anda dapat memicu mesin otomatis secara instan di bilah kiri dasbor kapan saja:
+              </p>
+              <div style="display: grid; grid-template-columns: 1fr; gap: 12px; font-size: 0.85rem; margin-top: 4px;">
+                <div style="display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid var(--color-primary); padding-left: 12px;">
+                  <div>
+                    <b style="color: var(--color-primary);">Lacak Ranking Google:</b>
+                    <p style="opacity: 0.8; margin-top: 2px;">Meluncurkan bot pelacak SERP untuk memperbarui posisi kata kunci target di database.</p>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid #34c759; padding-left: 12px;">
+                  <div>
+                    <b style="color: #34c759;">Crawler Instagram:</b>
+                    <p style="opacity: 0.8; margin-top: 2px;">Mengambil data followers and engagement rate dari profil sosial mitra Anda.</p>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid #ff9500; padding-left: 12px;">
+                  <div>
+                    <b style="color: #ff9500;">Riset Tren Viral AI:</b>
+                    <p style="opacity: 0.8; margin-top: 2px;">Mencari tren pencarian lokal dan mikro-niche baru berdasarkan target kata kunci aktif.</p>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid #af52de; padding-left: 12px;">
+                  <div>
+                    <b style="color: #af52de;">Tulis Draf Artikel:</b>
+                    <p style="opacity: 0.8; margin-top: 2px;">Memerintahkan AI menyusun draf konten baru berdasarkan kata kunci tren teratas yang dikumpulkan.</p>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid #0071e7; padding-left: 12px;">
+                  <div>
+                    <b style="color: #0071e7;">Render Slide Instagram:</b>
+                    <p style="opacity: 0.8; margin-top: 2px;">Menghasilkan slide grafis carousel berkualitas tinggi berdasarkan draf konten blog mitra.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Add Keyword Modal -->
+  <div class="spinner-overlay" id="addNicheModal" style="display: none; align-items: center; justify-content: center; z-index: 1100;">
+    <div class="glass-card" style="width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); border-color: var(--color-card-hover-border);">
+      <h3 style="font-size: 1.2rem; border-bottom: 1px solid var(--color-card-border); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; color: var(--color-primary); margin: 0;">
+        <span>🎯</span> Tambah Kata Kunci Niche Baru
+      </h3>
+      
+      <div class="field-group">
+        <label>Kata Kunci / Tren Mikro Lokal</label>
+        <input type="text" class="input-field" id="newNicheName" placeholder="contoh: rumput jepang bsd">
+      </div>
+      
+      <div class="field-group">
+        <label>Default Gaya Canvas Visual</label>
+        <select class="partner-select" id="newNicheStyle" style="width: 100%; border-radius: var(--radius-sm); padding: 10px 14px; background: var(--color-input-bg); color: var(--color-dark); border: 1px solid var(--color-input-border);">
+          <option value="Clean Premium">✨ Clean Premium</option>
+          <option value="Modern Classic">🏛️ Modern Classic</option>
+          <option value="Rustic Earthy">🍂 Rustic Earthy</option>
+          <option value="Eco Organic">🌱 Eco Organic</option>
+        </select>
+      </div>
+      
+      <div class="field-group">
+        <label>Prioritas Target (1 - 10)</label>
+        <input type="number" class="input-field" id="newNichePriority" min="1" max="10" value="5">
+      </div>
+      
+      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn btn-secondary" style="width: auto;" onclick="closeAddNicheModal()">Batal</button>
+        <button class="btn" style="width: auto;" onclick="submitNewNiche()">Simpan Kata Kunci</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script logic -->
+  <script>
+    let activePartnerId = 'duagaris';
+    let partnersData = [];
+    let activeTab = 'analytics';
+    let currentSlideIndex = 0;
+    let carouselImages = [];
+    
+    // Chart instances
+    let seoChartInstance = null;
+    let socialChartInstance = null;
+    let engagementChartInstance = null;
+    let currentStatsData = null;
+    let currentPalette = null;
+
+    // Run on startup
+    window.onload = function() {
+      loadPartners();
+    };
+
+    function showLoading(text) {
+      document.getElementById('spinnerText').innerText = text;
+      document.getElementById('loadingSpinner').style.display = 'flex';
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingSpinner').style.display = 'none';
+    }
+
+    function addLog(stage, status, message) {
+      const console = document.getElementById('logConsole');
+      const timeStr = new Date().toLocaleTimeString('id-ID');
+      
+      let bulletType = 'info';
+      if (status === 'success') bulletType = 'success';
+      else if (status === 'failed') bulletType = 'failed';
+      else if (status === 'change') bulletType = 'change';
+      
+      const newEntry = document.createElement('li');
+      newEntry.className = 'log-entry';
+      newEntry.innerHTML = `
+        <span class="log-bullet ${bulletType}"></span>
+        <div>
+          <span class="log-time">${timeStr}</span>
+          <span class="log-stage">[${stage}]</span>
+          <span>${message}</span>
+        </div>
+      `;
+      console.appendChild(newEntry);
+      console.scrollTop = console.scrollHeight;
+    }
+
+    // Tabs Manager
+    function switchTab(element, tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      element.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      activeTab = tabId;
+      
+      let panelName = 'Monitor & Analitik';
+      if (tabId === 'blog-studio') panelName = 'Studio Penulisan Blog';
+      else if (tabId === 'visual-studio') panelName = 'Instagram Visuals';
+      else if (tabId === 'settings') panelName = 'Penjadwalan & Konfigurasi';
+      else if (tabId === 'guide') panelName = 'Panduan Penggunaan';
+      
+      addLog('NAV', 'info', `Navigasi ke panel ${panelName}`);
+      
+      if (tabId === 'settings') {
+        loadSchedulerConfig();
+        loadNiches(activePartnerId);
+      } else if (tabId === 'guide') {
+        addLog('GUIDE', 'info', 'Membuka Panduan Pengoperasian AutoSEO Enterprise...');
+      }
+    }
+
+    // Load partners list
+    function loadPartners() {
+      fetch('/api/partners')
+        .then(res => res.json())
+        .then(data => {
+          partnersData = data;
+          const selector = document.getElementById('partnerSwapper');
+          selector.innerHTML = '';
+          
+          data.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.innerText = p.name;
+            selector.appendChild(opt);
+          });
+          
+          if (data.length > 0) {
+            selector.value = activePartnerId;
+            applyPartnerUI(activePartnerId);
+            loadPartnerStats(activePartnerId);
+          }
+        });
+    }
+
+    // Switch active partner
+    function switchPartner(partnerId) {
+      activePartnerId = partnerId;
+      addLog('SYS', 'change', `Berpindah mitra aktif ke: ${partnerId.toUpperCase()}`);
+      applyPartnerUI(partnerId);
+      loadPartnerStats(partnerId);
+    }
+
+    // Dynamically apply brand accent colors
+    function applyPartnerUI(partnerId) {
+      const partner = partnersData.find(p => p.id === partnerId);
+      if (!partner) return;
+      
+      // Update header
+      document.getElementById('headerPartnerName').innerText = partner.name;
+      document.getElementById('headerLogoBadge').innerText = partner.name.charAt(0);
+      
+      // Update sidebar details
+      document.getElementById('sidebarWebsiteUrl').innerText = partner.website_url;
+      document.getElementById('sidebarWebsiteUrl').href = partner.website_url;
+      document.getElementById('sidebarIgUsername').innerText = `@${partner.ig_username || 'null'}`;
+      
+      // Update niches badges
+      const container = document.getElementById('sidebarNicheBadges');
+      container.innerHTML = '';
+      partner.niche_list.forEach(n => {
+        const badge = document.createElement('span');
+        badge.style.background = 'var(--color-select-bg)';
+        badge.style.border = '1px solid var(--color-select-border)';
+        badge.style.padding = '4px 12px';
+        badge.style.borderRadius = '999px';
+        badge.style.fontSize = '0.78rem';
+        badge.style.color = 'var(--color-text-secondary)';
+        badge.innerText = n;
+        container.appendChild(badge);
+      });
+
+      // Reset theme selector back to brand upon switching accounts
+      if (document.getElementById('themeSelector')) {
+        document.getElementById('themeSelector').value = 'brand';
+      }
+
+      // Inject full brand palette dynamically
+      const pal = getBrandPalette(partner);
+      currentPalette = pal;
+      setThemeVariables(pal);
+    }
+
+    function getTranslucentColor(colorStr, opacity) {
+      if (!colorStr) return `rgba(0, 0, 0, ${opacity})`;
+      if (colorStr.startsWith('rgba')) {
+        return colorStr.replace(/[\d\.]+\)$/, `${opacity})`);
+      }
+      if (colorStr.startsWith('rgb')) {
+        return colorStr.replace('rgb', 'rgba').replace(')', `, ${opacity})`);
+      }
+      if (colorStr.startsWith('#')) {
+        let hex = colorStr.replace('#', '');
+        if (hex.length === 3) {
+          hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      }
+      if (colorStr.split(',').length === 3) {
+        return `rgba(${colorStr}, ${opacity})`;
+      }
+      return colorStr;
+    }
+
+    const THEME_PALETTES = {
+      forest: {
+        accent1: '42, 67, 45',
+        accent2: '74, 122, 77',
+        isDark: false,
+        bg: '#ecf4ed',
+        dark: '#1d1d1f',
+        textMuted: '#6b7a6d',
+        cardBg: 'rgba(255, 255, 255, 0.85)',
+        cardBorder: 'rgba(42, 67, 45, 0.08)',
+        cardHoverBorder: 'rgba(74, 122, 77, 0.25)',
+        cardShadow: '0 4px 24px rgba(42, 67, 45, 0.02)',
+        cardHoverShadow: '0 12px 40px rgba(42, 67, 45, 0.08)',
+        headerBg: 'rgba(236, 244, 237, 0.85)',
+        headerBorder: 'rgba(42, 67, 45, 0.08)',
+        selectBg: 'rgba(42, 67, 45, 0.06)',
+        selectBorder: 'rgba(42, 67, 45, 0.08)',
+        capsuleBg: 'rgba(255, 255, 255, 0.9)',
+        capsuleBorder: 'rgba(42, 67, 45, 0.06)',
+        capsuleDivider: 'rgba(42, 67, 45, 0.12)',
+        logEntryBg: '#ffffff',
+        logEntryBorder: 'rgba(42, 67, 45, 0.06)',
+        tabBg: 'rgba(42, 67, 45, 0.06)',
+        tabActiveBg: '#ffffff',
+        inputBg: '#fafafa',
+        inputBorder: 'rgba(42, 67, 45, 0.12)',
+        previewBg: '#ffffff',
+        previewBorder: 'rgba(42, 67, 45, 0.08)',
+        spinnerBg: 'rgba(236, 244, 237, 0.95)',
+        chartColors: ['rgba(42, 67, 45, 1)', 'rgba(74, 122, 77, 1)', 'rgba(52, 199, 89, 1)', 'rgba(110, 168, 114, 1)', 'rgba(22, 48, 25, 1)']
+      },
+      royal: {
+        accent1: '0, 113, 227',
+        accent2: '175, 82, 222',
+        isDark: false,
+        bg: '#f3eef9',
+        dark: '#1c1b24',
+        textMuted: '#7c7694',
+        cardBg: 'rgba(255, 255, 255, 0.85)',
+        cardBorder: 'rgba(175, 82, 222, 0.08)',
+        cardHoverBorder: 'rgba(175, 82, 222, 0.25)',
+        cardShadow: '0 4px 24px rgba(175, 82, 222, 0.02)',
+        cardHoverShadow: '0 12px 40px rgba(175, 82, 222, 0.08)',
+        headerBg: 'rgba(243, 238, 249, 0.85)',
+        headerBorder: 'rgba(175, 82, 222, 0.08)',
+        selectBg: 'rgba(175, 82, 222, 0.06)',
+        selectBorder: 'rgba(175, 82, 222, 0.08)',
+        capsuleBg: 'rgba(255, 255, 255, 0.9)',
+        capsuleBorder: 'rgba(175, 82, 222, 0.06)',
+        capsuleDivider: 'rgba(175, 82, 222, 0.12)',
+        logEntryBg: '#ffffff',
+        logEntryBorder: 'rgba(175, 82, 222, 0.06)',
+        tabBg: 'rgba(175, 82, 222, 0.06)',
+        tabActiveBg: '#ffffff',
+        inputBg: '#fafafa',
+        inputBorder: 'rgba(175, 82, 222, 0.12)',
+        previewBg: '#ffffff',
+        previewBorder: 'rgba(175, 82, 222, 0.08)',
+        spinnerBg: 'rgba(243, 238, 249, 0.95)',
+        chartColors: ['rgba(0, 113, 227, 1)', 'rgba(175, 82, 222, 1)', 'rgba(94, 92, 230, 1)', 'rgba(100, 210, 255, 1)', 'rgba(142, 68, 173, 1)']
+      },
+      sunset: {
+        accent1: '255, 149, 0',
+        accent2: '255, 59, 48',
+        isDark: false,
+        bg: '#faf3e6',
+        dark: '#2c1e13',
+        textMuted: '#947e6f',
+        cardBg: 'rgba(255, 255, 255, 0.85)',
+        cardBorder: 'rgba(255, 149, 0, 0.08)',
+        cardHoverBorder: 'rgba(255, 59, 48, 0.25)',
+        cardShadow: '0 4px 24px rgba(255, 149, 0, 0.02)',
+        cardHoverShadow: '0 12px 40px rgba(255, 59, 48, 0.08)',
+        headerBg: 'rgba(250, 243, 230, 0.85)',
+        headerBorder: 'rgba(255, 149, 0, 0.08)',
+        selectBg: 'rgba(255, 149, 0, 0.06)',
+        selectBorder: 'rgba(255, 149, 0, 0.08)',
+        capsuleBg: 'rgba(255, 255, 255, 0.9)',
+        capsuleBorder: 'rgba(255, 149, 0, 0.06)',
+        capsuleDivider: 'rgba(255, 149, 0, 0.12)',
+        logEntryBg: '#ffffff',
+        logEntryBorder: 'rgba(255, 149, 0, 0.06)',
+        tabBg: 'rgba(255, 149, 0, 0.06)',
+        tabActiveBg: '#ffffff',
+        inputBg: '#fafafa',
+        inputBorder: 'rgba(255, 149, 0, 0.12)',
+        previewBg: '#ffffff',
+        previewBorder: 'rgba(255, 149, 0, 0.08)',
+        spinnerBg: 'rgba(250, 243, 230, 0.95)',
+        chartColors: ['rgba(255, 149, 0, 1)', 'rgba(255, 59, 48, 1)', 'rgba(255, 204, 0, 1)', 'rgba(255, 69, 58, 1)', 'rgba(210, 105, 30, 1)']
+      },
+      midnight: {
+        accent1: '10, 132, 255',
+        accent2: '191, 90, 242',
+        isDark: true,
+        bg: '#0b0b0e',
+        dark: '#f5f5f7',
+        textMuted: '#9898a0',
+        cardBg: 'rgba(22, 22, 26, 0.75)',
+        cardBorder: 'rgba(255, 255, 255, 0.08)',
+        cardHoverBorder: 'rgba(10, 132, 255, 0.3)',
+        cardShadow: '0 4px 32px rgba(0, 0, 0, 0.5)',
+        cardHoverShadow: '0 12px 48px rgba(10, 132, 255, 0.15)',
+        headerBg: 'rgba(15, 15, 18, 0.85)',
+        headerBorder: 'rgba(255, 255, 255, 0.08)',
+        selectBg: 'rgba(255, 255, 255, 0.06)',
+        selectBorder: 'rgba(255, 255, 255, 0.1)',
+        capsuleBg: 'rgba(28, 28, 32, 0.85)',
+        capsuleBorder: 'rgba(255, 255, 255, 0.08)',
+        capsuleDivider: 'rgba(255, 255, 255, 0.15)',
+        logEntryBg: '#18181c',
+        logEntryBorder: 'rgba(255, 255, 255, 0.06)',
+        tabBg: 'rgba(255, 255, 255, 0.06)',
+        tabActiveBg: '#25252b',
+        inputBg: '#1c1c21',
+        inputBorder: 'rgba(255, 255, 255, 0.12)',
+        previewBg: '#151518',
+        previewBorder: 'rgba(255, 255, 255, 0.08)',
+        spinnerBg: 'rgba(11, 11, 14, 0.95)',
+        chartColors: ['#0a84ff', '#bf5af2', '#ff375f', '#30d158', '#ffd60a']
+      },
+      teal: {
+        accent1: '0, 128, 128',
+        accent2: '0, 191, 165',
+        isDark: false,
+        bg: '#e6f2f2',
+        dark: '#142525',
+        textMuted: '#6a7d7d',
+        cardBg: 'rgba(255, 255, 255, 0.85)',
+        cardBorder: 'rgba(0, 128, 128, 0.08)',
+        cardHoverBorder: 'rgba(0, 191, 165, 0.25)',
+        cardShadow: '0 4px 24px rgba(0, 128, 128, 0.02)',
+        cardHoverShadow: '0 12px 40px rgba(0, 191, 165, 0.08)',
+        headerBg: 'rgba(230, 242, 242, 0.85)',
+        headerBorder: 'rgba(0, 128, 128, 0.08)',
+        selectBg: 'rgba(0, 128, 128, 0.06)',
+        selectBorder: 'rgba(0, 128, 128, 0.08)',
+        capsuleBg: 'rgba(255, 255, 255, 0.9)',
+        capsuleBorder: 'rgba(0, 128, 128, 0.06)',
+        capsuleDivider: 'rgba(0, 128, 128, 0.12)',
+        logEntryBg: '#ffffff',
+        logEntryBorder: 'rgba(0, 128, 128, 0.06)',
+        tabBg: 'rgba(0, 128, 128, 0.06)',
+        tabActiveBg: '#ffffff',
+        inputBg: '#fafafa',
+        inputBorder: 'rgba(0, 128, 128, 0.12)',
+        previewBg: '#ffffff',
+        previewBorder: 'rgba(0, 128, 128, 0.08)',
+        spinnerBg: 'rgba(230, 242, 242, 0.95)',
+        chartColors: ['rgba(0, 128, 128, 1)', 'rgba(0, 191, 165, 1)', 'rgba(32, 178, 170, 1)', 'rgba(64, 224, 208, 1)', 'rgba(0, 95, 95, 1)']
+      }
+    };
+
+    function getBrandPalette(partner) {
+      const acc1 = partner.theme_accent || '42, 67, 45';
+      const acc2 = partner.theme_accent2 || '74, 122, 77';
+      return {
+        accent1: acc1,
+        accent2: acc2,
+        isDark: false,
+        bg: '#f5f5f7',
+        dark: '#1d1d1f',
+        textMuted: '#86868b',
+        cardBg: 'rgba(255, 255, 255, 0.8)',
+        cardBorder: 'rgba(0, 0, 0, 0.06)',
+        cardHoverBorder: `rgba(${acc2}, 0.15)`,
+        cardShadow: '0 4px 24px rgba(0, 0, 0, 0.015)',
+        cardHoverShadow: '0 12px 40px rgba(0, 0, 0, 0.04)',
+        headerBg: 'rgba(255, 255, 255, 0.75)',
+        headerBorder: 'rgba(0, 0, 0, 0.06)',
+        selectBg: 'rgba(0, 0, 0, 0.04)',
+        selectBorder: 'rgba(0, 0, 0, 0.06)',
+        capsuleBg: 'rgba(255, 255, 255, 0.85)',
+        capsuleBorder: 'rgba(0, 0, 0, 0.05)',
+        capsuleDivider: 'rgba(0, 0, 0, 0.08)',
+        logEntryBg: '#ffffff',
+        logEntryBorder: 'rgba(0, 0, 0, 0.04)',
+        tabBg: 'rgba(0, 0, 0, 0.05)',
+        tabActiveBg: '#ffffff',
+        inputBg: '#fafafa',
+        inputBorder: 'rgba(0, 0, 0, 0.08)',
+        previewBg: '#ffffff',
+        previewBorder: 'rgba(0, 0, 0, 0.06)',
+        spinnerBg: 'rgba(255, 255, 255, 0.85)',
+        chartColors: [
+          `rgba(${acc1}, 1)`,
+          `rgba(${acc2}, 1)`,
+          `rgba(${acc1.split(',').map(x => Math.min(255, Math.round(parseInt(x) * 1.4))).join(',')}, 1)`,
+          `rgba(${acc2.split(',').map(x => Math.max(0, Math.round(parseInt(x) * 0.75))).join(',')}, 1)`,
+          'rgba(175, 82, 222, 1)'
+        ]
+      };
+    }
+
+    function setThemeVariables(pal) {
+      const root = document.documentElement;
+      root.style.setProperty('--accent-rgb', pal.accent1);
+      root.style.setProperty('--accent-rgb-2', pal.accent2);
+      root.style.setProperty('--color-bg', pal.bg);
+      root.style.setProperty('--color-dark', pal.dark);
+      root.style.setProperty('--color-text-secondary', pal.textMuted);
+      root.style.setProperty('--color-card-bg', pal.cardBg);
+      root.style.setProperty('--color-card-border', pal.cardBorder);
+      root.style.setProperty('--color-card-hover-border', pal.cardHoverBorder);
+      root.style.setProperty('--color-card-shadow', pal.cardShadow);
+      root.style.setProperty('--color-card-hover-shadow', pal.cardHoverShadow);
+      root.style.setProperty('--color-header-bg', pal.headerBg);
+      root.style.setProperty('--color-header-border', pal.headerBorder);
+      root.style.setProperty('--color-select-bg', pal.selectBg);
+      root.style.setProperty('--color-select-border', pal.selectBorder);
+      root.style.setProperty('--color-capsule-bg', pal.capsuleBg);
+      root.style.setProperty('--color-capsule-border', pal.capsuleBorder);
+      root.style.setProperty('--color-capsule-divider', pal.capsuleDivider);
+      root.style.setProperty('--color-log-entry-bg', pal.logEntryBg);
+      root.style.setProperty('--color-log-entry-border', pal.logEntryBorder);
+      root.style.setProperty('--color-tab-bg', pal.tabBg);
+      root.style.setProperty('--color-tab-active-bg', pal.tabActiveBg);
+      root.style.setProperty('--color-input-bg', pal.inputBg);
+      root.style.setProperty('--color-input-border', pal.inputBorder);
+      root.style.setProperty('--color-preview-bg', pal.previewBg);
+      root.style.setProperty('--color-preview-border', pal.previewBorder);
+      root.style.setProperty('--color-spinner-bg', pal.spinnerBg);
+    }
+
+    function changeThemePalette(paletteKey) {
+      if (paletteKey === 'brand') {
+        const partner = partnersData.find(p => p.id === activePartnerId);
+        if (partner) {
+          const pal = getBrandPalette(partner);
+          currentPalette = pal;
+          setThemeVariables(pal);
+          addLog('THEME', 'change', `Tema diatur ulang ke Mitra Bawaan (${partner.name})`);
+        }
+      } else {
+        const pal = THEME_PALETTES[paletteKey];
+        if (pal) {
+          currentPalette = pal;
+          setThemeVariables(pal);
+          addLog('THEME', 'change', `Berpindah ke tema: ${paletteKey.toUpperCase()}`);
+        }
+      }
+      // Redraw charts with the new colors!
+      if (currentStatsData) {
+        drawSeoChart(currentStatsData.seo_history);
+        drawInstagramCharts(currentStatsData.social_history);
+      }
+    }
+
+    // Load statistics from database for selected partner
+    function loadPartnerStats(partnerId) {
+      fetch(`/api/stats/${partnerId}`)
+        .then(res => res.json())
+        .then(data => {
+          currentStatsData = data;
+          // Fill sidebar quick metrics
+          const latest = data.latest_social;
+          document.getElementById('metricFollowers').innerText = Number(latest.followers).toLocaleString('id-ID');
+          document.getElementById('metricEngagement').innerText = `${latest.engagement_rate}%`;
+          document.getElementById('metricAvgSeo').innerText = data.avg_seo_rank > 0 ? `#${data.avg_seo_rank}` : '30+';
+          document.getElementById('metricPosts').innerText = latest.posts_count;
+
+          // Fill logs console as beautiful bullets
+          const logsBox = document.getElementById('logConsole');
+          logsBox.innerHTML = '';
+          
+          if (data.logs.length === 0) {
+            logsBox.innerHTML = '<li class="log-entry"><span class="log-bullet info"></span><div>Belum ada aktivitas tercatat.</div></li>';
+          } else {
+            data.logs.forEach(l => {
+              const entry = document.createElement('li');
+              entry.className = 'log-entry';
+              
+              // Handle SQLite space format for cross-platform browser support
+              const tsString = typeof l.timestamp === 'string' && !l.timestamp.includes('T') ? l.timestamp.replace(' ', 'T') : l.timestamp;
+              const logTime = new Date(tsString).toLocaleTimeString('id-ID');
+              
+              let bulletType = 'info';
+              if (l.status === 'success') bulletType = 'success';
+              else if (l.status === 'failed') bulletType = 'failed';
+              
+              entry.innerHTML = `
+                <span class="log-bullet ${bulletType}"></span>
+                <div>
+                  <span class="log-time">${logTime}</span>
+                  <span class="log-stage">[${l.stage}]</span>
+                  <span>${l.message}</span>
+                </div>
+              `;
+              logsBox.appendChild(entry);
+            });
+          }
+          logsBox.scrollTop = logsBox.scrollHeight;
+
+          // Process and draw Charts
+          drawSeoChart(data.seo_history);
+          drawInstagramCharts(data.social_history);
+          
+          // Load slides visualizer images
+          loadCarouselSlides(data.latest_slides);
+          
+          // Load article list
+          loadPartnerArticles(partnerId);
+
+          // Detect Google Rank Drop (Algorithmic Adaptability Feature)
+          let rankDropped = false;
+          if (data.seo_history) {
+            let dropCount = 0;
+            for (const kw in data.seo_history) {
+              const history = data.seo_history[kw];
+              if (history && history.length >= 2) {
+                const lastRank = history[history.length - 1].rank;
+                const prevRank = history[history.length - 2].rank;
+                // Higher rank number = worse position in SEO (e.g. rank 15 is worse than rank 10)
+                if (lastRank > prevRank && prevRank > 0) {
+                  dropCount++;
+                }
+              }
+            }
+            if (dropCount >= 1) {
+              rankDropped = true;
+            }
+          }
+          
+          const alertBanner = document.getElementById('rankDropAlert');
+          if (alertBanner) {
+            if (rankDropped) {
+              alertBanner.style.display = 'block';
+              addLog('SEO', 'failed', '⚠️ Peringatan Kritis: Fluktuasi Google Terdeteksi pada Kata Kunci Niche Anda!');
+            } else {
+              alertBanner.style.display = 'none';
+            }
+          }
+          
+          // If we are currently on settings tab, reload it too
+          if (activeTab === 'settings') {
+            loadSchedulerConfig();
+            loadNiches(partnerId);
+          }
+        });
+    }
+
+    // Draw SEO ranks chart
+    function drawSeoChart(seoHistory) {
+      const ctx = document.getElementById('seoRankChart').getContext('2d');
+      
+      if (seoChartInstance) {
+        seoChartInstance.destroy();
+      }
+
+      const accentRGB1 = currentPalette ? currentPalette.accent1 : '42, 67, 45';
+      const accentRGB2 = currentPalette ? currentPalette.accent2 : '74, 122, 77';
+      const textColor = currentPalette ? currentPalette.dark : '#1d1d1f';
+      const textMuted = currentPalette ? currentPalette.textMuted : '#86868b';
+      
+      const isDark = currentPalette ? currentPalette.isDark : false;
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
+
+      const datasets = [];
+      const colors = (currentPalette && currentPalette.chartColors) ? currentPalette.chartColors : [
+        `rgba(${accentRGB1}, 1)`,
+        `rgba(${accentRGB2}, 1)`,
+        'rgba(175, 82, 222, 1)',  // Apple Purple
+        'rgba(255, 149, 0, 1)',   // Apple Orange
+        'rgba(255, 59, 48, 1)'    // Apple Red
+      ];
+      
+      let colorIdx = 0;
+      let allDates = new Set();
+      
+      for (const keyword in seoHistory) {
+        const points = seoHistory[keyword];
+        points.forEach(pt => allDates.add(new Date(pt.checked_at).toLocaleDateString('id-ID')));
+      }
+      
+      const labels = Array.from(allDates).sort((a,b) => new Date(a) - new Date(b));
+      
+      for (const keyword in seoHistory) {
+        const points = seoHistory[keyword];
+        const color = colors[colorIdx % colors.length];
+        
+        const dataPoints = labels.map(label => {
+          const matched = points.find(pt => new Date(pt.checked_at).toLocaleDateString('id-ID') === label);
+          return matched ? (matched.rank === 0 ? 30 : matched.rank) : null;
+        });
+
+        datasets.push({
+          label: keyword,
+          data: dataPoints,
+          borderColor: color,
+          backgroundColor: getTranslucentColor(color, 0.05),
+          tension: 0.3,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: false
+        });
+        colorIdx++;
+      }
+
+      seoChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: { labels: labels, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: textColor, font: { family: '-apple-system', size: 12, weight: '500' } }
+            }
+          },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: textMuted } },
+            y: {
+              reverse: true, // Rank 1 di atas
+              min: 1,
+              max: 30,
+              grid: { color: gridColor },
+              ticks: { color: textMuted, stepSize: 5 }
+            }
+          }
+        }
+      });
+    }
+
+    // Draw Instagram Stats curves
+    function drawInstagramCharts(socialHistory) {
+      const followersCtx = document.getElementById('igFollowersChart').getContext('2d');
+      const engagementCtx = document.getElementById('igEngagementChart').getContext('2d');
+      
+      if (socialChartInstance) socialChartInstance.destroy();
+      if (engagementChartInstance) engagementChartInstance.destroy();
+      
+      const accentRGB1 = currentPalette ? currentPalette.accent1 : '42, 67, 45';
+      const accentRGB2 = currentPalette ? currentPalette.accent2 : '74, 122, 77';
+      const textColor = currentPalette ? currentPalette.dark : '#1d1d1f';
+      const textMuted = currentPalette ? currentPalette.textMuted : '#86868b';
+      
+      const isDark = currentPalette ? currentPalette.isDark : false;
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
+
+      const labels = socialHistory.map(h => new Date(h.checked_at).toLocaleDateString('id-ID'));
+      const followersData = socialHistory.map(h => h.followers);
+      const engagementData = socialHistory.map(h => h.engagement_rate);
+      
+      const followersColor = (currentPalette && currentPalette.chartColors) ? currentPalette.chartColors[0] : `rgba(${accentRGB1}, 1)`;
+      const engagementColor = (currentPalette && currentPalette.chartColors) ? currentPalette.chartColors[1] : `rgba(${accentRGB2}, 1)`;
+
+      // Follower Growth line
+      socialChartInstance = new Chart(followersCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Followers',
+            data: followersData,
+            borderColor: followersColor,
+            backgroundColor: getTranslucentColor(followersColor, 0.12),
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2.5,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { display: false } },
+            y: { grid: { color: gridColor }, ticks: { color: textMuted } }
+          }
+        }
+      });
+      
+      // Engagement Curve
+      engagementChartInstance = new Chart(engagementCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Engagement Rate (%)',
+            data: engagementData,
+            borderColor: engagementColor,
+            backgroundColor: getTranslucentColor(engagementColor, 0.12),
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2.5,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { display: false } },
+            y: { grid: { color: gridColor }, ticks: { color: textMuted } }
+          }
+        }
+      });
+    }
+
+    // Trigger pipeline execution
+    function runPipeline(engineType) {
+      let label = '';
+      if (engineType === 'seo') label = 'Melacak Google Ranking...';
+      else if (engineType === 'social') label = 'Mengambil Analitik Instagram...';
+      else if (engineType === 'trend') label = 'Melakukan Riset Tren AI...';
+      else if (engineType === 'blog') label = 'Menulis Draf Blog Baru...';
+      else if (engineType === 'visual') label = 'Mengeksekusi Pillow Canvas Visual...';
+
+      showLoading(label);
+      addLog('PIPELINE', 'start', `Memicu pipeline engine: ${engineType.toUpperCase()}`);
+
+      fetch('/api/run-pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partner_id: activePartnerId, engine: engineType })
+      })
+      .then(res => res.json())
+      .then(res => {
+        hideLoading();
+        if (res.status === 'success') {
+          addLog('PIPELINE', 'success', res.message);
+          loadPartnerStats(activePartnerId);
+        } else {
+          addLog('PIPELINE', 'failed', res.message);
+          alert(`Eksekusi gagal: ${res.message}`);
+        }
+      })
+      .catch(err => {
+        hideLoading();
+        addLog('PIPELINE', 'failed', `Error konektivitas server: ${err.message}`);
+      });
+    }
+
+    // CAROUSEL SLIDES VISUALIZER
+    function loadCarouselSlides(slidesList) {
+      const container = document.getElementById('carouselSlideContainer');
+      const navBox = document.getElementById('carouselNavBox');
+      const placeholder = document.getElementById('noSlidesPlaceholder');
+      
+      // Clean existing slides
+      container.querySelectorAll('img').forEach(el => el.remove());
+      
+      if (!slidesList || slidesList.length === 0) {
+        placeholder.style.display = 'flex';
+        navBox.style.display = 'none';
+        carouselImages = [];
+        return;
+      }
+      
+      placeholder.style.display = 'none';
+      navBox.style.display = 'flex';
+      
+      carouselImages = slidesList;
+      currentSlideIndex = 0;
+      
+      slidesList.forEach((slide, idx) => {
+        const img = document.createElement('img');
+        img.src = slide.path;
+        img.alt = `Slide ${slide.num}`;
+        if (idx === 0) img.className = 'active';
+        container.appendChild(img);
+      });
+      
+      updateCarouselUI();
+    }
+
+    function updateCarouselUI() {
+      const container = document.getElementById('carouselSlideContainer');
+      const imgs = container.querySelectorAll('img');
+      
+      imgs.forEach((img, idx) => {
+        if (idx === currentSlideIndex) img.classList.add('active');
+        else img.classList.remove('active');
+      });
+      
+      document.getElementById('carouselIndicator').innerText = `${currentSlideIndex + 1} / ${carouselImages.length}`;
+    }
+
+    function nextSlide() {
+      if (carouselImages.length === 0) return;
+      currentSlideIndex = (currentSlideIndex + 1) % carouselImages.length;
+      updateCarouselUI();
+    }
+
+    function prevSlide() {
+      if (carouselImages.length === 0) return;
+      currentSlideIndex = (currentSlideIndex - 1 + carouselImages.length) % carouselImages.length;
+      updateCarouselUI();
+    }
+
+    // BLOG STUDIO MANAGER
+    let allArticles = [];
+
+    function loadPartnerArticles(partnerId) {
+      fetch(`/api/articles/${partnerId}`)
+        .then(res => res.json())
+        .then(data => {
+          const body = document.getElementById('articlesTableBody');
+          body.innerHTML = '';
+          
+          allArticles = [...data.drafts, ...data.live];
+          
+          if (allArticles.length === 0) {
+            body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#86868b;">Belum ada artikel. Klik "Buat Baru" atau klik "Tulis Draf Artikel" di pipa pengendali.</td></tr>';
+            return;
+          }
+          
+          allArticles.forEach(art => {
+            const tr = document.createElement('tr');
+            const statusClass = art.status === 'draft' ? 'status-draft' : 'status-published';
+            const statusLabel = art.status === 'draft' ? 'Lokal Draf' : 'Live Supabase';
+            
+            tr.innerHTML = `
+              <td style="font-weight:600; color:var(--color-dark);">${art.title}</td>
+              <td>${art.category}</td>
+              <td>${art.readTime} menit</td>
+              <td><span class="badge-status ${statusClass}">${statusLabel}</span></td>
+              <td>
+                <button class="btn btn-secondary" style="width:auto; display:inline-block; padding:4px 10px; font-size:0.8rem; border-color:var(--color-select-border);" onclick="editArticle('${art.slug}')">
+                  Edit
+                </button>
+              </td>
+            `;
+            body.appendChild(tr);
+          });
+        });
+    }
+
+    function createNewArticle() {
+      document.getElementById('articleEditorFrame').style.display = 'flex';
+      document.getElementById('editorTitleLabel').innerText = 'Editor Artikel: Draf Baru';
+      document.getElementById('editArticleId').value = '';
+      document.getElementById('editArticleSlug').value = '';
+      document.getElementById('editTitle').value = '';
+      document.getElementById('editCategory').value = 'Inspirasi & Tren';
+      document.getElementById('editImageUrl').value = 'https://placehold.co/1200x630/4A7A4D/FFFFFF/png?text=Rumah+Taman';
+      document.getElementById('editTags').value = 'taman, minimalis, modern';
+      document.getElementById('editExcerpt').value = '';
+      document.getElementById('editContent').value = '## Subjudul Konten Anda\n\nTulis isi konten berkualitas Anda di sini...';
+      
+      updateLivePreview();
+      document.getElementById('articleEditorFrame').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function editArticle(slug) {
+      const art = allArticles.find(a => a.slug === slug);
+      if (!art) return;
+      
+      document.getElementById('articleEditorFrame').style.display = 'flex';
+      document.getElementById('editorTitleLabel').innerText = `Editor Artikel: ${art.title}`;
+      
+      document.getElementById('editArticleId').value = art.id;
+      document.getElementById('editArticleSlug').value = art.slug;
+      document.getElementById('editTitle').value = art.title;
+      document.getElementById('editCategory').value = art.category;
+      document.getElementById('editImageUrl').value = art.imageUrl;
+      document.getElementById('editTags').value = art.tags.join(', ');
+      document.getElementById('editExcerpt').value = art.excerpt;
+      document.getElementById('editContent').value = art.content;
+      
+      const publishBtn = document.getElementById('btnPublishLive');
+      if (art.status === 'published') {
+        publishBtn.innerText = 'Perbarui Live di Supabase';
+        publishBtn.className = 'btn btn-publish';
+      } else {
+        publishBtn.innerText = 'Terbitkan Live ke Supabase';
+        publishBtn.className = 'btn btn-publish';
+      }
+
+      updateLivePreview();
+      document.getElementById('articleEditorFrame').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeArticleEditor() {
+      document.getElementById('articleEditorFrame').style.display = 'none';
+    }
+
+    // Markdown Parser Helper to Simulate Website CSS
+    function updateLivePreview() {
+      const title = document.getElementById('editTitle').value;
+      const category = document.getElementById('editCategory').value;
+      const imgUrl = document.getElementById('editImageUrl').value;
+      const content = document.getElementById('editContent').value;
+      
+      const container = document.getElementById('livePreviewContainer');
+      
+      let html = `
+        <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; color:var(--color-primary); letter-spacing:0.05em; margin-bottom:8px;">${category}</div>
+        <h1 style="font-size:1.8rem; font-family:'Outfit', sans-serif; font-weight:700; line-height:1.2; color:var(--color-dark); margin-bottom:16px;">${title}</h1>
+      `;
+      
+      if (imgUrl) {
+        html += `<img src="${imgUrl}" alt="Cover" style="width:100%; height:220px; object-fit:cover; border-radius:12px; margin-bottom:20px; box-shadow:0 8px 16px rgba(0,0,0,0.05);">`;
+      }
+      
+      const lines = content.split('\n');
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('### ')) {
+          html += `<h3 style="font-size:1.15rem; font-weight:700; color:var(--color-dark); margin-top:20px; margin-bottom:8px;">${trimmed.replace('### ', '')}</h3>`;
+        } else if (trimmed.startsWith('## ')) {
+          html += `<h2 style="font-size:1.35rem; font-weight:700; color:var(--color-primary); border-bottom:1px solid var(--color-card-border); padding-bottom:6px; margin-top:24px; margin-bottom:12px;">${trimmed.replace('## ', '')}</h2>`;
+        } else if (trimmed.startsWith('# ')) {
+          html += `<h1 style="font-size:1.6rem; font-weight:700; color:var(--color-dark); margin-top:28px; margin-bottom:14px;">${trimmed.replace('# ', '')}</h1>`;
+        } else if (trimmed.startsWith('- ')) {
+          html += `<li style="margin-left:20px; margin-bottom:6px; color:var(--color-dark); opacity:0.85; font-size:0.92rem; line-height:1.6;">${trimmed.replace('- ', '')}</li>`;
+        } else if (trimmed === '') {
+          html += '<div style="height:10px;"></div>';
+        } else {
+          html += `<p style="margin-bottom:10px; color:var(--color-dark); opacity:0.85; font-size:0.92rem; line-height:1.6;">${trimmed}</p>`;
+        }
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // Save article locally
+    function saveDraft() {
+      const id = document.getElementById('editArticleId').value;
+      const slug = document.getElementById('editArticleSlug').value;
+      const title = document.getElementById('editTitle').value;
+      const category = document.getElementById('editCategory').value;
+      const imageUrl = document.getElementById('editImageUrl').value;
+      const excerpt = document.getElementById('editExcerpt').value;
+      const tags = document.getElementById('editTags').value;
+      const content = document.getElementById('editContent').value;
+      
+      if (!title) {
+        alert('Judul artikel wajib diisi.');
+        return;
+      }
+      
+      const payload = {
+        partner_id: activePartnerId,
+        id: id,
+        slug: slug,
+        title: title,
+        category: category,
+        imageUrl: imageUrl,
+        excerpt: excerpt,
+        tags: tags,
+        content: content
+      };
+      
+      showLoading('Menyimpan Draf...');
+      
+      fetch('/api/articles/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        hideLoading();
+        if (res.status === 'success') {
+          addLog('STUDIO', 'success', `Draf '${title}' berhasil disimpan secara lokal.`);
+          closeArticleEditor();
+          loadPartnerArticles(activePartnerId);
+        } else {
+          alert('Gagal menyimpan draf: ' + res.message);
+        }
+      });
+    }
+
+    // Publish to Live Supabase
+    function publishLive() {
+      const title = document.getElementById('editTitle').value;
+      const category = document.getElementById('editCategory').value;
+      const imageUrl = document.getElementById('editImageUrl').value;
+      const excerpt = document.getElementById('editExcerpt').value;
+      const tags = document.getElementById('editTags').value;
+      const content = document.getElementById('editContent').value;
+      
+      if (!title || !content) {
+        alert('Judul dan Konten artikel wajib diisi sebelum penerbitan.');
+        return;
+      }
+      
+      const payload = {
+        partner_id: activePartnerId,
+        title: title,
+        category: category,
+        imageUrl: imageUrl,
+        excerpt: excerpt,
+        tags: tags,
+        content: content
+      };
+      
+      showLoading('Menerbitkan ke Supabase Live...');
+      addLog('SUPABASE', 'start', `Mulai menerbitkan artikel '${title}' ke database Supabase...`);
+      
+      fetch('/api/articles/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === 'success') {
+          addLog('SUPABASE', 'success', res.message);
+          alert(`Sukses! Artikel berhasil dipublikasikan.\nMode: ${res.mode}`);
+          closeArticleEditor();
+          loadPartnerArticles(activePartnerId);
+        } else {
+          addLog('SUPABASE', 'failed', res.message);
+          alert('Gagal menerbitkan: ' + res.message);
+        }
+      })
+      .catch(err => {
+        hideLoading();
+        addLog('SUPABASE', 'failed', `Error: ${err.message}`);
+        alert('Gagal menerbitkan: ' + err.message);
+      });
+    }
+
+    // CENTAUR AI ENGINE - SCHEDULER & NICHE ACTIONS
+    function enrichStoryWithAI() {
+      const title = document.getElementById('editTitle').value;
+      const category = document.getElementById('editCategory').value;
+      const realExperience = document.getElementById('editRealExperience').value;
+      
+      if (!title || !realExperience) {
+        alert('Judul dan Fakta Lapangan wajib diisi sebelum mengembangkan narasi dengan AI.');
+        return;
+      }
+      
+      showLoading('AI Sedang Mengembangkan Narasi Centaur...');
+      addLog('CENTAUR', 'start', `Mulai mensintesis fakta lapangan untuk artikel: '${title}'`);
+      
+      fetch('/api/ai/enrich-story', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partner_id: activePartnerId,
+          title: title,
+          category: category,
+          real_experience: realExperience
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        hideLoading();
+        if (res.status === 'success') {
+          document.getElementById('editContent').value = res.content;
+          document.getElementById('editExcerpt').value = res.excerpt;
+          updateLivePreview();
+          addLog('CENTAUR', 'success', 'Narasi E-E-A-T berhasil disintesis dan dimuat ke editor.');
+        } else {
+          addLog('CENTAUR', 'failed', 'Gagal memproses narasi: ' + res.message);
+          alert('Gagal: ' + res.message);
+        }
+      })
+      .catch(err => {
+        hideLoading();
+        addLog('CENTAUR', 'failed', 'Error jaringan: ' + err.message);
+        alert('Error: ' + err.message);
+      });
+    }
+
+    function loadSchedulerConfig() {
+      fetch('/api/scheduler/config')
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === 'success') {
+          document.getElementById('schedulerCountdown').innerText = `${res.hours_left} Jam ${res.minutes_left} Menit`;
+          document.getElementById('schedulerNextRunDate').innerText = res.formatted_next_run;
+          
+          document.getElementById('schedMinHours').value = res.config.interval_hours_min;
+          document.getElementById('schedMaxHours').value = res.config.interval_hours_max;
+          
+          if (currentStatsData && currentStatsData.logs && currentStatsData.logs.length > 0) {
+            const latestBlogRun = currentStatsData.logs.find(l => l.stage.toLowerCase() === 'blog engine');
+            if (latestBlogRun) {
+              const tsStr = typeof latestBlogRun.timestamp === 'string' && !latestBlogRun.timestamp.includes('T') ? latestBlogRun.timestamp.replace(' ', 'T') : latestBlogRun.timestamp;
+              const formatted = new Date(tsStr).toLocaleString('id-ID');
+              document.getElementById('schedulerLastRun').innerText = `${formatted} (${latestBlogRun.status.toUpperCase()})`;
+            } else {
+              document.getElementById('schedulerLastRun').innerText = 'Belum pernah berjalan';
+            }
+          } else {
+            document.getElementById('schedulerLastRun').innerText = 'Belum pernah berjalan';
+          }
+        }
+      });
+    }
+
+    function updateSchedulerConfig() {
+      const minHours = document.getElementById('schedMinHours').value;
+      const maxHours = document.getElementById('schedMaxHours').value;
+      
+      if (!minHours || !maxHours) {
+        alert('Interval min dan max wajib diisi.');
+        return;
+      }
+      
+      showLoading('Menyimpan Konfigurasi...');
+      
+      fetch('/api/scheduler/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          interval_hours_min: minHours,
+          interval_hours_max: maxHours
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        hideLoading();
+        if (res.status === 'success') {
+          addLog('SCHEDULER', 'change', `Interval posting diperbarui ke: ${minHours} - ${maxHours} jam.`);
+          alert('Sukses! Konfigurasi scheduler berhasil diperbarui.');
+          loadSchedulerConfig();
+        } else {
+          alert('Gagal: ' + res.message);
+        }
+      })
+      .catch(err => {
+        hideLoading();
+        alert('Error: ' + err.message);
+      });
+    }
+
+    function loadNiches(partnerId) {
+      fetch(`/api/niches/${partnerId}`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('nichesTableBody');
+        tbody.innerHTML = '';
+        
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#86868b;">Belum ada kata kunci niche terkonfigurasi.</td></tr>';
+          return;
+        }
+        
+        data.forEach(n => {
+          const tr = document.createElement('tr');
+          
+          let priorityBadgeColor = '#86868b';
+          let priorityText = 'Normal';
+          if (n.priority >= 8) {
+            priorityBadgeColor = '#ff3b30';
+            priorityText = 'High Target';
+          } else if (n.priority >= 5) {
+            priorityBadgeColor = '#ff9500';
+            priorityText = 'Medium';
+          } else {
+            priorityBadgeColor = '#0071e7';
+            priorityText = 'Low priority';
+          }
+          
+          tr.innerHTML = `
+            <td style="font-weight:600; color:var(--color-dark);">${n.niche}</td>
+            <td>${n.style}</td>
+            <td>
+              <span class="badge-status" style="background:${getTranslucentColor(priorityBadgeColor, 0.1)}; color:${priorityBadgeColor}; border:1px solid ${getTranslucentColor(priorityBadgeColor, 0.2)}; font-weight:700;">
+                Prioritas ${n.priority} (${priorityText})
+              </span>
+            </td>
+            <td>
+              <span class="badge-status status-published" style="background:rgba(52,199,89,0.1); color:#34c759; border:1px solid rgba(52,199,89,0.2);">
+                ${n.enabled ? 'Aktif' : 'Nonaktif'}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function openAddNicheModal() {
+      document.getElementById('newNicheName').value = '';
+      document.getElementById('newNichePriority').value = '5';
+      document.getElementById('newNicheStyle').value = 'Clean Premium';
+      document.getElementById('addNicheModal').style.display = 'flex';
+    }
+
+    function closeAddNicheModal() {
+      document.getElementById('addNicheModal').style.display = 'none';
+    }
+
+    function submitNewNiche() {
+      const niche = document.getElementById('newNicheName').value.trim();
+      const priority = document.getElementById('newNichePriority').value;
+      const style = document.getElementById('newNicheStyle').value;
+      
+      if (!niche) {
+        alert('Nama kata kunci niche wajib diisi.');
+        return;
+      }
+      
+      showLoading('Menyimpan Kata Kunci...');
+      
+      fetch('/api/niches/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partner_id: activePartnerId,
+          niche: niche,
+          priority: priority,
+          style: style
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        hideLoading();
+        closeAddNicheModal();
+        if (res.status === 'success') {
+          addLog('NICHE', 'success', `Kata kunci tren baru ditambahkan ke kolektor lokal: '${niche}'`);
+          applyPartnerUI(activePartnerId);
+          loadNiches(activePartnerId);
+          alert('Sukses! Kata kunci tren baru berhasil ditambahkan.');
+        } else {
+          alert('Gagal: ' + res.message);
+        }
+      })
+      .catch(err => {
+        hideLoading();
+        closeAddNicheModal();
+        alert('Error: ' + err.message);
+      });
+    }
+
+    function loadPartnerCredentials() {
+      const partnerId = document.getElementById('partnerSelectManage').value;
+      fetch('/api/partners')
+      .then(res => res.json())
+      .then(partners => {
+        const target = partners.find(p => p.id === partnerId);
+        if (target) {
+          document.getElementById('partnerIgUsername').value = target.ig_username || '';
+          document.getElementById('partnerIgPassword').value = ''; // Always empty for security
+        }
+      });
+    }
+
+    function savePartnerCredentials() {
+      const partnerId = document.getElementById('partnerSelectManage').value;
+      const igUsername = document.getElementById('partnerIgUsername').value;
+      const igPassword = document.getElementById('partnerIgPassword').value;
+      
+      showLoading('Menyimpan Kredensial IG...');
+      
+      // Fetch existing partner details first to preserve them
+      fetch('/api/partners')
+      .then(res => res.json())
+      .then(partners => {
+        const target = partners.find(p => p.id === partnerId);
+        if (!target) {
+            hideLoading();
+            alert('Partner tidak ditemukan');
+            return;
+        }
+        
+        // Prepare save payload
+        const payload = {
+            id: target.id,
+            name: target.name,
+            website_url: target.website_url,
+            niche_list: target.niche_list,
+            theme_accent: target.theme_accent,
+            theme_accent2: target.theme_accent2,
+            theme_bg: target.theme_bg,
+            ig_username: igUsername,
+            ig_password: igPassword
+        };
+        
+        return fetch('/api/partners/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+      })
+      .then(res => res ? res.json() : null)
+      .then(res => {
+        if (!res) return;
+        hideLoading();
+        if (res.status === 'success') {
+          addLog('SYSTEM', 'change', `Kredensial IG untuk partner ${partnerId} berhasil diperbarui.`);
+          alert('Sukses! Kredensial IG tersimpan ke Database.');
+          document.getElementById('partnerIgPassword').value = ''; // Clear password field
+        } else {
+          alert('Gagal menyimpan kredensial: ' + res.message);
+        }
+      })
+      .catch(err => {
+        hideLoading();
+        alert('Error: ' + err.message);
+      });
+    }
+
+    // Panggil saat load untuk mengisi form pertama
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(loadPartnerCredentials, 1500);
+    });
+  </script>
+</body>
+</html>

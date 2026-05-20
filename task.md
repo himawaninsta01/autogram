@@ -1,0 +1,52 @@
+# Daftar Tugas: Evolusi Centaur AI Engine (Human-in-the-Loop) & Integrasi Front-End
+
+- `[x]` **Fase 5: Evolusi Centaur AI Engine & Integrasi Front-End**
+  - `[x]` **Peningkatan Blog Editor**:
+    - `[x]` Tambahkan area input teks *Fakta Lapangan (E-E-A-T)* `#editRealExperience` ke form blog editor di `templates/index.html`.
+    - `[x]` Tambahkan tombol `💡 Kembangkan Narasi dengan AI` di sebelah input tersebut.
+    - `[x]` Implementasikan fungsi Javascript `enrichStoryWithAI()` untuk memanggil POST `/api/ai/enrich-story` secara aman dengan loading overlay.
+  - `[x]` **Pembuatan Tab Ke-4 "Penjadwalan & Konfigurasi"**:
+    - `[x]` Tambahkan tab button baru ke segmented nav: `Penjadwalan & Konfigurasi`.
+    - `[x]` Buat penampung konten tab `#tab-settings` dengan desain glassmorphism premium.
+    - `[x]` Rancang kartu countdown visual `Next Post Countdown` yang ditarik dari `/api/scheduler/config`.
+    - `[x]` Integrasikan form interval durasi postingan untuk memperbarui `config.yaml` via `/api/scheduler/update`.
+    - `[x]` Rancang tabel kata kunci target tren lokal yang menarik prioritas langsung dari `/api/niches/<partner_id>`.
+  - `[x]` **Implementasi Modul Modal & Aksi Niche/Keywords**:
+    - `[x]` Buat modal overlay macOS sheet-style `#addNicheModal` untuk menambahkan kata kunci tren mikro baru.
+    - `[x]` Implementasikan fungsi Javascript `openAddNicheModal()`, `closeAddNicheModal()`, dan `submitNewNiche()`.
+  - `[x]` **Implementasi Fitur Algorithmic Adaptability**:
+    - `[x]` Implementasikan kalkulasi penurunan performa peringkat secara historis pada `loadPartnerStats`.
+    - `[x]` Tampilkan banner peringatan Google fluktuasi `#rankDropAlert` berwarna merah transparan ketika terjadi penurunan.
+  - `[x]` **Verifikasi & Sinkronisasi**:
+    - `[x]` Jalankan verifikasi manual pada antarmuka dasbor `http://localhost:5000`.
+    - `[x]` Pastikan seluruh alur sinkronisasi data SQLite dan `config.yaml` berjalan mulus.
+
+- `[x]` **Fase 6: Penyelarasan Tata Letak & Justifikasi UI/UX**
+  - `[x]` **Justifikasi Segmented Navigation Tab**:
+    - `[x]` Refaktor `.tabs-nav` dari `display: inline-flex` ke full-width `display: flex` layout.
+    - `[x]` Terapkan `flex: 1` dan `text-align: center` pada `.tab-btn` agar tombol navigasi mengisi seluruh lebar container secara merata tanpa meninggalkan sisa tempat kosong di sebelah kanan.
+    - `[x]` Tambahkan dukungan responsif berupa horizontal scroll tersembunyi (`overflow-x: auto`, `scrollbar-width: none`) dan `white-space: nowrap` agar tata letak tetap kokoh di viewport sempit.
+
+- `[x]` **Fase 7: Migrasi Cloud Gratis, Memori Topik & Rotasi Format**
+  - `[x]` **Skema Database & Memori (Anti-Pengulangan)**:
+    - `[x]` Perbarui `core/database.py` dengan kolom `post_format`, `series_id`, `series_index`.
+    - `[x]` Modifikasi `content_engine.py` agar menarik 30 topik terakhir dari DB dan menyertakannya di Prompt LLM.
+  - `[x]` **Rotasi Format (Single, Carousel, Thematic)**:
+    - `[x]` Sesuaikan prompt AI di `content_engine.py` untuk mengembalikan skema JSON dinamis sesuai format acak.
+    - `[x]` Perbarui `core/pipeline.py` agar mengurai dan menyimpan banyak part dari kampanye bertema ke SQLite.
+  - `[x]` **Migrasi Engine Visual ke Cloud Gratis**:
+    - `[x]` Ganti ComfyUI (`localhost:8188`) dengan API gratis (Pollinations.ai / HuggingFace) di `visual_engine.py`.
+    - `[x]` Hapus variabel yang berkaitan dengan server image lokal di `config.yaml`.
+
+- `[x]` **Fase 8: Arsitektur Multi-Penyewa (Multi-Tenant) & Keamanan**
+  - `[x]` **Autentikasi Dasbor (Keamanan Akses)**:
+    - `[x]` Terapkan Flask Basic Auth pada rute-rute sensitif di `dashboard.py`.
+  - `[x]` **Pemisahan Sesi IG Dinamis (Tanpa Hardcode)**:
+    - `[x]` Hapus referensi ke file `.env` di `engines/post_engine.py`.
+    - `[x]` Berikan argumen `ig_username` dan `ig_password` secara eksplisit pada `upload_post`.
+    - `[x]` Simpan `ig_session_{username}.json` secara mandiri per klien.
+  - `[x]` **Antarmuka Manajemen Kostumer**:
+    - `[x]` Tambahkan tombol dan modal Manajemen Kostumer di `templates/index.html`.
+    - `[x]` Implementasikan penyisipan form JS dan endpoint simpan di `dashboard.py`.
+  - `[x]` **Penyatuan Pipa Eksekusi Klien**:
+    - `[x]` Perbarui `core/pipeline.py` untuk menarik kredensial akun IG langsung dari baris mitra yang sedang aktif.

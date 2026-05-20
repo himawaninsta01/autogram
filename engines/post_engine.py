@@ -12,51 +12,37 @@ load_dotenv()
 
 SESSION_FILE = Path(__file__).parent.parent / "data" / "ig_session.json"
 
-def get_client() -> Client:
-    """Login ke Instagram, prioritaskan IG_SESSION dari environment (GitHub Secrets)."""
+def get_client(username: str, password: str) -> Client:
+    """Login ke Instagram menggunakan kredensial dinamis (Multi-Tenant)."""
     cl = Client()
     cl.delay_range = [2, 5]
 
-    username = os.getenv("IG_USERNAME")
-    password = os.getenv("IG_PASSWORD")
-
     if not username or not password:
-        raise ValueError("IG_USERNAME atau IG_PASSWORD tidak ditemukan di .env")
+        raise ValueError("Kredensial Instagram (Username/Password) tidak diberikan.")
 
-    # ── PRIORITAS 1: IG_SESSION dari GitHub Secrets ──
-    session_str = os.getenv("IG_SESSION")
-    if session_str:
+    # Gunakan session file unik per klien untuk mencegah tumpang tindih
+    session_file = Path(__file__).parent.parent / "data" / f"ig_session_{username}.json"
+
+    # ── PRIORITAS 1: Session file lokal ──
+    if session_file.exists():
         try:
-            cl.set_settings(json.loads(session_str))
+            cl.load_settings(session_file)
             cl.login(username, password)
             cl.get_timeline_feed()
-            print("✅ Session dari GitHub Secrets berhasil digunakan")
+            print(f"✅ Session file lokal untuk {username} berhasil digunakan")
             return cl
         except LoginRequired:
-            print("⚠️  Session dari Secrets expired, coba login fresh...")
+            print(f"⚠️  Session {username} expired, login ulang...")
+            session_file.unlink(missing_ok=True)
         except Exception as e:
-            print(f"⚠️  Session dari Secrets error: {e}, coba login fresh...")
+            print(f"⚠️  Session {username} error: {e}, login ulang...")
+            session_file.unlink(missing_ok=True)
 
-    # ── PRIORITAS 2: Session file lokal ──
-    if SESSION_FILE.exists():
-        try:
-            cl.load_settings(SESSION_FILE)
-            cl.login(username, password)
-            cl.get_timeline_feed()
-            print("✅ Session file lokal berhasil digunakan")
-            return cl
-        except LoginRequired:
-            print("⚠️  Session file lokal expired, login ulang...")
-            SESSION_FILE.unlink(missing_ok=True)
-        except Exception as e:
-            print(f"⚠️  Session file lokal error: {e}, login ulang...")
-            SESSION_FILE.unlink(missing_ok=True)
-
-    # ── PRIORITAS 3: Login fresh ──
+    # ── PRIORITAS 2: Login fresh ──
     try:
         print(f"🔐 Login fresh sebagai {username}...")
         cl.login(username, password)
-        cl.dump_settings(SESSION_FILE)
+        cl.dump_settings(session_file)
         print("✅ Login berhasil, session disimpan")
         return cl
     except ChallengeRequired:
@@ -72,6 +58,7 @@ def get_random_post_delay() -> int:
     return int(delay)
 
 def upload_post(image_paths, caption: str, hashtags: list,
+                ig_username: str, ig_password: str,
                 dry_run: bool = False) -> dict:
     """
     Upload ke Instagram. Support single foto dan carousel (list).
@@ -106,7 +93,7 @@ def upload_post(image_paths, caption: str, hashtags: list,
     time.sleep(get_random_post_delay())
 
     try:
-        cl = get_client()
+        cl = get_client(ig_username, ig_password)
 
         if is_carousel:
             print(f"📸 Mengupload carousel {len(paths)} slide ke Instagram...")

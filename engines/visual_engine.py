@@ -1,9 +1,11 @@
 # visual_engine.py — v4.0 (Prompt Breakdown Carousel)
 # Slide: Cover → Prompt → Output → Breakdown x3 → CTA
 
-import time, random, requests, yaml, re, textwrap, json
+import time, random, requests, yaml, re, textwrap, json, sys
 from pathlib import Path
 from datetime import datetime
+
+sys.path.append(str(Path(__file__).parent.parent))
 from PIL import Image, ImageDraw, ImageFont
 import io, urllib.parse
 
@@ -20,17 +22,81 @@ THEMES = {
 DEFAULT_THEME = {"bg": (8, 8, 24), "accent": (0, 229, 160), "accent2": (0, 180, 255)}
 
 FONT_BOLD = [
+    "C:\\Windows\\Fonts\\arialbd.ttf",
+    "arialbd.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
 ]
 FONT_REG = [
+    "C:\\Windows\\Fonts\\arial.ttf",
+    "arial.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
 ]
 FONT_MONO = [
+    "C:\\Windows\\Fonts\\cour.ttf",
+    "cour.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
 ]
+
+def draw_transparent_rounded_rect(canvas, xy, radius=0, fill=None, outline=None, width=1):
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    draw_overlay = ImageDraw.Draw(overlay)
+    if radius > 0:
+        draw_overlay.rounded_rectangle(xy, radius=radius, fill=fill, outline=outline, width=width)
+    else:
+        draw_overlay.rectangle(xy, fill=fill, outline=outline, width=width)
+    canvas.alpha_composite(overlay)
+
+def get_partner_by_niche(niche: str) -> dict:
+    try:
+        from core.database import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, theme_bg, theme_accent, theme_accent2, ig_username, niche_list FROM partners")
+        rows = cursor.fetchall()
+        conn.close()
+        for row in rows:
+            niche_list = json.loads(row["niche_list"]) if row["niche_list"] else []
+            if niche.lower() in [n.lower() for n in niche_list]:
+                def parse_rgb(s):
+                    return tuple(int(x.strip()) for x in s.split(","))
+                return {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "bg": parse_rgb(row["theme_bg"]),
+                    "accent": parse_rgb(row["theme_accent"]),
+                    "accent2": parse_rgb(row["theme_accent2"]),
+                    "ig_username": row["ig_username"] or "duagarislandscape"
+                }
+    except Exception as e:
+        print(f"Error loading partner by niche: {e}")
+    return None
+
+def get_partner_by_id(partner_id: str) -> dict:
+    try:
+        from core.database import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, theme_bg, theme_accent, theme_accent2, ig_username FROM partners WHERE id = ?", (partner_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            def parse_rgb(s):
+                return tuple(int(x.strip()) for x in s.split(","))
+            return {
+                "id": row["id"],
+                "name": row["name"],
+                "bg": parse_rgb(row["theme_bg"]),
+                "accent": parse_rgb(row["theme_accent"]),
+                "accent2": parse_rgb(row["theme_accent2"]),
+                "ig_username": row["ig_username"] or "duagarislandscape"
+            }
+    except Exception as e:
+        print(f"Error loading partner by id: {e}")
+    return None
+
 
 def load_config():
     with open(CONFIG_PATH) as f:
@@ -88,11 +154,11 @@ def fetch_background(prompt: str, W: int, H: int):
                 img = Image.open(io.BytesIO(r.content)).convert("RGB")
                 if img.size != (W, H):
                     img = img.resize((W, H), Image.LANCZOS)
-                print("✅")
+                print("[OK]")
                 return img
-            print(f"❌{r.status_code}")
-        except requests.Timeout: print("⏱")
-        except Exception as e: print(f"❌{e}")
+            print(f"[FAIL:{r.status_code}]")
+        except requests.Timeout: print("[TIMEOUT]")
+        except Exception as e: print(f"[FAIL:{e}]")
         if attempt < 3: time.sleep(attempt * 4)
     return None
 
@@ -120,16 +186,17 @@ def draw_slide_indicator(draw, W, H, current, total, accent):
         fill = (*accent, 255) if i == current else (*accent, 55)
         draw.ellipse([cx-dot_r,cy-dot_r,cx+dot_r,cy+dot_r], fill=fill)
 
-def draw_watermark(draw, W, H, accent):
+def draw_watermark(canvas, W, H, accent, ig_username="superchronos.ai"):
     font = get_font(24)
-    draw.rectangle([0, H-80, W, H-78], fill=(*accent, 70))
-    draw.text((W-40, H-42), "@superchronos.ai", font=font,
+    draw_transparent_rounded_rect(canvas, [0, H-80, W, H-78], fill=(*accent, 70))
+    draw = ImageDraw.Draw(canvas)
+    draw.text((W-40, H-42), f"@{ig_username}", font=font,
               fill=(120,135,160), anchor="rm")
 
 # ══════════════════════════════════════════════
 # SLIDE 1: COVER
 # ══════════════════════════════════════════════
-def slide_cover(bg, data, niche, caption_hook, theme, total, W=1080, H=1080):
+def slide_cover(bg, data, niche, caption_hook, theme, total, W=1080, H=1080, ig_username="superchronos.ai"):
     accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
@@ -139,8 +206,9 @@ def slide_cover(bg, data, niche, caption_hook, theme, total, W=1080, H=1080):
     bb = draw.textbbox((0,0), badge, font=font_badge)
     bw, bh = bb[2]-bb[0]+20, bb[3]-bb[1]+14
     bx, by = 50, 75
-    draw.rounded_rectangle([bx,by,bx+bw,by+bh], radius=8,
-                            fill=(*accent,35), outline=(*accent,200), width=2)
+    draw_transparent_rounded_rect(canvas, [bx,by,bx+bw,by+bh], radius=8,
+                                  fill=(*accent,35), outline=(*accent,200), width=2)
+    draw = ImageDraw.Draw(canvas)
     draw.text((bx+10,by+7), badge.strip(), font=font_badge, fill=(*accent,255))
 
     # Label use case
@@ -172,13 +240,13 @@ def slide_cover(bg, data, niche, caption_hook, theme, total, W=1080, H=1080):
               fill=(*accent, 180), anchor="rm")
 
     draw_slide_indicator(draw, W, H, 0, total, accent)
-    draw_watermark(draw, W, H, accent)
+    draw_watermark(canvas, W, H, accent, ig_username=ig_username)
     return canvas.convert("RGB")
 
 # ══════════════════════════════════════════════
 # SLIDE 2: PROMPT (tampilan kode)
 # ══════════════════════════════════════════════
-def slide_prompt(bg, data, theme, total, W=1080, H=1080):
+def slide_prompt(bg, data, theme, total, W=1080, H=1080, ig_username="superchronos.ai"):
     accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
@@ -191,9 +259,10 @@ def slide_prompt(bg, data, theme, total, W=1080, H=1080):
     # Kotak kode
     box_x, box_y = 40, 115
     box_w, box_h = W - 80, H - 200
-    draw.rounded_rectangle([box_x, box_y, box_x+box_w, box_y+box_h],
-                            radius=16, fill=(15, 20, 40, 230),
-                            outline=(*accent, 100), width=2)
+    draw_transparent_rounded_rect(canvas, [box_x, box_y, box_x+box_w, box_y+box_h],
+                                  radius=16, fill=(15, 20, 40, 230),
+                                  outline=(*accent, 100), width=2)
+    draw = ImageDraw.Draw(canvas)
 
     # Dot dekoratif (terminal style)
     dot_colors = [(255,90,90), (255,200,50), (50,210,100)]
@@ -216,13 +285,13 @@ def slide_prompt(bg, data, theme, total, W=1080, H=1080):
         py += 42
 
     draw_slide_indicator(draw, W, H, 1, total, accent)
-    draw_watermark(draw, W, H, accent)
+    draw_watermark(canvas, W, H, accent, ig_username=ig_username)
     return canvas.convert("RGB")
 
 # ══════════════════════════════════════════════
 # SLIDE 3: OUTPUT (chat bubble style)
 # ══════════════════════════════════════════════
-def slide_output(bg, data, theme, total, W=1080, H=1080):
+def slide_output(bg, data, theme, total, W=1080, H=1080, ig_username="superchronos.ai"):
     accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
@@ -235,9 +304,10 @@ def slide_output(bg, data, theme, total, W=1080, H=1080):
     # Bubble output
     bub_x, bub_y = 40, 115
     bub_w, bub_h = W - 80, H - 195
-    draw.rounded_rectangle([bub_x, bub_y, bub_x+bub_w, bub_y+bub_h],
-                            radius=20, fill=(20, 30, 55, 235),
-                            outline=(*accent2, 80), width=2)
+    draw_transparent_rounded_rect(canvas, [bub_x, bub_y, bub_x+bub_w, bub_y+bub_h],
+                                  radius=20, fill=(20, 30, 55, 235),
+                                  outline=(*accent2, 80), width=2)
+    draw = ImageDraw.Draw(canvas)
 
     # Avatar AI
     av_r = 28
@@ -266,14 +336,14 @@ def slide_output(bg, data, theme, total, W=1080, H=1080):
         oy += 46
 
     draw_slide_indicator(draw, W, H, 2, total, accent)
-    draw_watermark(draw, W, H, accent)
+    draw_watermark(canvas, W, H, accent, ig_username=ig_username)
     return canvas.convert("RGB")
 
 # ══════════════════════════════════════════════
 # SLIDE 4-6: BREAKDOWN (per bagian prompt)
 # ══════════════════════════════════════════════
 def slide_breakdown(bg, item: dict, idx: int, total_bd: int,
-                    theme, slide_num, total_slides, W=1080, H=1080):
+                    theme, slide_num, total_slides, W=1080, H=1080, ig_username="superchronos.ai"):
     accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
@@ -290,8 +360,9 @@ def slide_breakdown(bg, item: dict, idx: int, total_bd: int,
 
     # Kotak highlight bagian prompt
     hbox_y = 130
-    draw.rounded_rectangle([40, hbox_y, W-40, hbox_y+110], radius=14,
-                            fill=(*accent, 20), outline=(*accent, 150), width=2)
+    draw_transparent_rounded_rect(canvas, [40, hbox_y, W-40, hbox_y+110], radius=14,
+                                  fill=(*accent, 20), outline=(*accent, 150), width=2)
+    draw = ImageDraw.Draw(canvas)
     font_quote = get_font(36, mono=True)
     draw.text((W//2, hbox_y+55), f'"{item["bagian"]}"',
               font=font_quote, fill=(*accent, 255), anchor="mm")
@@ -318,13 +389,13 @@ def slide_breakdown(bg, item: dict, idx: int, total_bd: int,
               font=font_eff, fill=(*accent2, 120), anchor="mm")
 
     draw_slide_indicator(draw, W, H, slide_num, total_slides, accent)
-    draw_watermark(draw, W, H, accent)
+    draw_watermark(canvas, W, H, accent, ig_username=ig_username)
     return canvas.convert("RGB")
 
 # ══════════════════════════════════════════════
 # SLIDE TERAKHIR: CTA
 # ══════════════════════════════════════════════
-def slide_cta(bg, data, niche, theme, total, W=1080, H=1080):
+def slide_cta(bg, data, niche, theme, total, W=1080, H=1080, ig_username="superchronos.ai"):
     accent, accent2, bg_col = theme["accent"], theme["accent2"], theme["bg"]
     canvas, draw = base_canvas(bg, bg_col, accent, W, H)
 
@@ -349,7 +420,7 @@ def slide_cta(bg, data, niche, theme, total, W=1080, H=1080):
 
     # Username
     font_usr = get_font(46, bold=True)
-    draw.text((cx, cy+180), "@superchronos.ai",
+    draw.text((cx, cy+180), f"@{ig_username}",
               font=font_usr, fill=(*accent,255), anchor="mm")
 
     # Tool tag
@@ -358,33 +429,51 @@ def slide_cta(bg, data, niche, theme, total, W=1080, H=1080):
               font=font_tag, fill=(*accent2,150), anchor="mm")
 
     draw_slide_indicator(draw, W, H, total-1, total, accent)
-    draw_watermark(draw, W, H, accent)
+    draw_watermark(canvas, W, H, accent, ig_username=ig_username)
     return canvas.convert("RGB")
 
 # ══════════════════════════════════════════════
 # MAIN FUNCTION
 # ══════════════════════════════════════════════
 def generate_carousel(image_prompt: str, niche: str, topic: str,
-                      brief: str = "", caption: str = "") -> list:
+                      brief: str = "", caption: str = "", partner_id: str = None, slide_count: int = 1) -> list:
     config = load_config()
     W = config["image"].get("width", 1080)
     H = config["image"].get("height", 1080)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    theme  = THEMES.get(niche, DEFAULT_THEME)
+    # Dynamic partner theme loading
+    partner = None
+    if partner_id:
+        partner = get_partner_by_id(partner_id)
+    if not partner:
+        partner = get_partner_by_niche(niche)
+
+    if partner:
+        theme = {
+            "bg": partner["bg"],
+            "accent": partner["accent"],
+            "accent2": partner["accent2"]
+        }
+        ig_username = partner["ig_username"] or "duagarislandscape"
+    else:
+        theme = THEMES.get(niche, DEFAULT_THEME)
+        ig_username = "superchronos.ai"
+
     accent = theme["accent"]
     data   = parse_brief(brief, topic)
     hook   = caption.split("\n")[0][:120] if caption else data["judul"]
 
-    # Hitung total slide: cover + prompt + output + breakdown*N + cta
+    # Hitung total slide
     n_breakdown  = len(data["breakdown"]) if data["breakdown"] else 3
-    total_slides = 1 + 1 + 1 + n_breakdown + 1
+    total_slides = 1 + 1 + 1 + n_breakdown + 1 if slide_count > 1 else 1
 
-    print(f"🎨 Generating carousel {total_slides} slide (Prompt Breakdown)...")
+    print(f"[VISUAL] Generating visual: {slide_count} slide(s)...")
     print(f"   Tool : {data['ai_tool']}")
     print(f"   Judul: {data['judul']}")
+    print(f"   Watermark: @{ig_username}")
 
-    # Fetch background sekali, dipakai semua slide
+    # Fetch background dari Pollinations.ai (FREE CLOUD)
     bg = fetch_background(image_prompt, W, H)
 
     paths = []
@@ -395,28 +484,30 @@ def generate_carousel(image_prompt: str, niche: str, topic: str,
         p = OUTPUT_DIR / f"{ts}_{niche_slug}_{label}.jpg"
         img.save(str(p), "JPEG", quality=92)
         paths.append(str(p))
-        print(f"   ✅ {label}")
+        print(f"   [OK] {label}")
         return str(p)
 
-    save(slide_cover(bg, data, niche, hook, theme, total_slides, W, H), "s00_cover")
-    save(slide_prompt(bg, data, theme, total_slides, W, H), "s01_prompt")
-    save(slide_output(bg, data, theme, total_slides, W, H), "s02_output")
+    save(slide_cover(bg, data, niche, hook, theme, total_slides, W, H, ig_username=ig_username), "s00_cover")
+    
+    if slide_count > 1:
+        save(slide_prompt(bg, data, theme, total_slides, W, H, ig_username=ig_username), "s01_prompt")
+        save(slide_output(bg, data, theme, total_slides, W, H, ig_username=ig_username), "s02_output")
 
-    for i, item in enumerate(data["breakdown"][:3]):
-        save(slide_breakdown(bg, item, i, min(3, len(data["breakdown"])),
-                             theme, 3+i, total_slides, W, H),
-             f"s{3+i:02d}_breakdown{i+1}")
+        for i, item in enumerate(data["breakdown"][:3]):
+            save(slide_breakdown(bg, item, i, min(3, len(data["breakdown"])),
+                                 theme, 3+i, total_slides, W, H, ig_username=ig_username),
+                 f"s{3+i:02d}_breakdown{i+1}")
 
-    save(slide_cta(bg, data, niche, theme, total_slides, W, H),
-         f"s{total_slides-1:02d}_cta")
+        save(slide_cta(bg, data, niche, theme, total_slides, W, H, ig_username=ig_username),
+             f"s{total_slides-1:02d}_cta")
 
-    print(f"✅ Carousel selesai: {len(paths)} slide")
+    print(f"[OK] Visual engine selesai: {len(paths)} slide")
     return paths
 
 def generate_image(image_prompt: str, niche: str, topic: str,
-                   brief: str = "", caption: str = "") -> list:
+                   brief: str = "", caption: str = "", partner_id: str = None, slide_count: int = 1) -> list:
     """Alias untuk backward compat."""
-    return generate_carousel(image_prompt, niche, topic, brief, caption)
+    return generate_carousel(image_prompt, niche, topic, brief, caption, partner_id, slide_count)
 
 if __name__ == "__main__":
     test_brief = """JUDUL_GAMBAR: PROMPT EMAIL PROFESIONAL
@@ -433,5 +524,5 @@ BREAKDOWN_3: Maksimal 150 kata | Batasan panjang mencegah output yang terlalu be
         brief=test_brief,
         caption="Email profesional dalam 30 detik? Claude bisa. 🔥"
     )
-    print(f"\n🎯 {len(paths)} slide generated")
+    print(f"\n[OK] {len(paths)} slide generated")
     for p in paths: print(f"   {p}")
