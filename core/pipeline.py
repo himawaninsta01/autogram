@@ -27,6 +27,62 @@ def log_pipeline(post_id: int, stage: str, status: str, duration: float = 0, mes
     conn.commit()
     conn.close()
 
+def sync_to_supabase(post_id: int):
+    """Sync a post row from local SQLite to Supabase PostgreSQL."""
+    url = os.getenv("SUPABASE_URL")
+    key = os.getenv("SUPABASE_SERVICE_KEY")
+    if not url or not key:
+        print("⚠️  Supabase not configured (SUPABASE_URL / SUPABASE_SERVICE_KEY), skipping sync.")
+        return
+
+    import requests
+    conn = get_connection()
+    row = conn.execute("SELECT * FROM posts WHERE id = ?", (post_id,)).fetchone()
+    conn.close()
+
+    if not row:
+        return
+
+    data = dict(row)
+    
+    # Map fields to match Supabase schema (exclude 'id' to let Supabase auto-increment it uniquely)
+    payload = {
+        "niche": data.get("niche"),
+        "topic": data.get("topic"),
+        "trend_score": data.get("trend_score"),
+        "caption": data.get("caption"),
+        "image_path": data.get("image_path"),
+        "image_prompt": data.get("image_prompt"),
+        "qa_score": data.get("qa_score"),
+        "ig_post_id": data.get("ig_post_id"),
+        "status": data.get("status"),
+        "error_msg": data.get("error_msg"),
+    }
+    
+    # Convert hashtags string back to array if it is JSON string
+    hashtags_str = data.get("hashtags", "[]")
+    try:
+        payload["hashtags"] = json.loads(hashtags_str)
+    except Exception:
+        payload["hashtags"] = []
+
+    headers = {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+    }
+
+    try:
+        endpoint = f"{url.rstrip('/')}/rest/v1/posts"
+        res = requests.post(endpoint, headers=headers, json=payload)
+        if res.status_code in [200, 201, 204]:
+            print("✅ Successfully synced run data to Supabase PostgreSQL.")
+        else:
+            print(f"⚠️  Failed to sync to Supabase: {res.status_code} - {res.text}")
+    except Exception as e:
+        print(f"⚠️  Supabase request failed: {e}")
+
 def save_post_draft(data: dict) -> int:
     conn = get_connection()
     image_path = data.get("image_path", "")
@@ -234,6 +290,12 @@ def run_pipeline(dry_run: bool = False) -> dict:
         print(f"\n❌ Pipeline error: {e}")
         notify_fail(reason=str(e), stage="pipeline")
         return {"success": False, "reason": str(e)}
+    finally:
+        if post_id:
+            try:
+                sync_to_supabase(post_id)
+            except Exception as se:
+                print(f"⚠️  Supabase sync failed: {se}")
 
 if __name__ == "__main__":
     result = run_pipeline(dry_run=False)

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AutoGram v2 — Cloud Free Stack · Updated</title>
+<title>AutoGram v2 — Cloud Free Stack · Sesi 4 ✅</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap');
   :root {
@@ -309,7 +309,7 @@
     <h1>Auto<span>Gram</span></h1>
     <div class="version-pill">v2 · DEPLOYED ✓</div>
   </div>
-  <div class="sub">PROGRESS REKAP · 15 MEI 2026 · SESI 2</div>
+  <div class="sub">PROGRESS REKAP · 15 MEI 2026 · SESI 4</div>
 </div>
 
 <!-- FORK BANNER -->
@@ -325,17 +325,17 @@
 <div class="progress-wrap">
   <div class="progress-label">
     <span>Overall Progress</span>
-    <span class="pct">90% — GitHub Actions Live</span>
+    <span class="pct">98% — Full Pipeline End-to-End Confirmed ✅</span>
   </div>
   <div class="progress-bar">
-    <div class="progress-fill"></div>
+    <div class="progress-fill" style="width:98%"></div>
   </div>
   <div class="progress-phases">
     <div class="phase phase-done">1 · ENGINES</div>
     <div class="phase phase-done">2 · PIPELINE</div>
     <div class="phase phase-done">3 · DEPLOY CI</div>
-    <div class="phase phase-active">4 · BOT UI</div>
-    <div class="phase phase-pending">5 · GO-LIVE</div>
+    <div class="phase phase-done">4 · BOT UI</div>
+    <div class="phase phase-active">5 · GO-LIVE</div>
   </div>
 </div>
 
@@ -346,7 +346,7 @@
     <div class="lbl">BIAYA / BULAN</div>
   </div>
   <div class="stat">
-    <div class="val" style="color:var(--accent2)">2</div>
+    <div class="val" style="color:var(--accent2)">4</div>
     <div class="lbl">PIPELINE SUKSES</div>
   </div>
   <div class="stat">
@@ -546,35 +546,149 @@
   </div>
 </div>
 
-<!-- SELANJUTNYA -->
+<!-- SUDAH SELESAI SESI 3 -->
 <div class="section">
-  <h2>⬜ Selanjutnya</h2>
+  <h2>✅ Selesai di Sesi 3</h2>
+
+  <div class="item">
+    <div class="item-icon">☁️</div>
+    <div class="item-body">
+      <div class="item-title">Cloudflare Workers — <code>autogram-worker/src/index.js</code></div>
+      <div class="item-desc">Deploy gratis tanpa CC. URL: <code>autogram-worker.autogram.workers.dev</code>. Webhook Telegram terdaftar dan aktif. Secrets: <code>BOT_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code>, <code>GH_TOKEN</code>, <code>GH_OWNER</code>, <code>GH_REPO</code>.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
 
   <div class="item">
     <div class="item-icon">🤖</div>
     <div class="item-body">
-      <div class="item-title">Telegram Bot UI — <code>core/bot.py</code></div>
-      <div class="item-desc">Control panel via Telegram: /run, /post [niche], /status, /history. User bisa pilih niche sebelum AI research.</div>
+      <div class="item-title">Telegram Bot UI — webhook mode via Cloudflare</div>
+      <div class="item-desc">Commands: <code>/run</code>, <code>/post [niche]</code>, <code>/post</code> (inline keyboard), <code>/status</code>, <code>/history</code>, <code>/help</code>. Bot sudah merespon pesan — balasan "🚀 Memulai pipeline..." masuk ke Telegram. Security whitelist aktif.</div>
     </div>
-    <div class="item-badge"><span class="badge badge-next">NEXT</span></div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
   </div>
 
   <div class="item">
-    <div class="item-icon">📊</div>
+    <div class="item-icon">⚙️</div>
     <div class="item-body">
-      <div class="item-title">Web Dashboard (Opsional)</div>
-      <div class="item-desc">UI monitoring di Vercel. Bisa dibangun setelah Telegram Bot stabil. Telegram Bot tetap jalan paralel.</div>
+      <div class="item-title">Pipeline + Actions — niche override</div>
+      <div class="item-desc"><code>core/pipeline.py</code> baca <code>NICHE_OVERRIDE</code> dari env. <code>autogram.yml</code> tambah trigger <code>repository_dispatch</code>. Sudah push ke GitHub.</div>
     </div>
-    <div class="item-badge"><span class="badge badge-skip">OPTIONAL</span></div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">⚙️</div>
+    <div class="item-body">
+      <div class="item-title">GitHub Actions dispatch — <code>repository_dispatch</code> confirmed ✅</div>
+      <div class="item-desc">GH_TOKEN baru tersimpan di Cloudflare Worker. Pipeline #3 dan #4 sukses triggered dari bot via <code>repository_dispatch</code>. Run time ~2m 11s–2m 27s. End-to-end flow: <code>/run</code> → Worker → GitHub Actions → Notif Telegram terkonfirmasi.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+</div>
+
+<!-- SUDAH SELESAI SESI 4 -->
+<div class="section">
+  <h2>✅ Selesai di Sesi 4</h2>
+
+  <div class="item">
+    <div class="item-icon">🔗</div>
+    <div class="item-body">
+      <div class="item-title">Test ulang /run → GitHub Actions dispatch ✅</div>
+      <div class="item-desc">Konfirmasi penuh: <code>/run</code> dari Telegram → Cloudflare Worker → <code>repository_dispatch</code> → GitHub Actions berhasil. Pipeline #3 (2m 27s) dan #4 (2m 11s) sukses dengan event <code>manual_run</code>.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🤖</div>
+    <div class="item-body">
+      <div class="item-title">Bot trigger multi-niche berjalan</div>
+      <div class="item-desc">Post berhasil untuk niche <strong>AI</strong> (topik: gemini ai, QA 8.0/10) dan <strong>tips produktivitas</strong> (QA 8.0/10). Notifikasi Telegram masuk lengkap dengan niche, topik, dan QA score.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔄</div>
+    <div class="item-body">
+      <div class="item-title">End-to-end pipeline fully confirmed</div>
+      <div class="item-desc">Seluruh alur berjalan tanpa intervensi manual: Bot UI → Worker → CI/CD → Content/Visual/QA Engine → Notifier. Stack 100% cloud gratis, PC bebas mati.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-ok">DONE</span></div>
+  </div>
+</div>
+
+<!-- SELANJUTNYA -->
+<div class="section">
+  <h2>⬜ Selanjutnya — Prioritas</h2>
+
+  <div class="item">
+    <div class="item-icon">📱</div>
+    <div class="item-body">
+      <div class="item-title">Pantau Warmup @superchronos.ai</div>
+      <div class="item-desc">Pipeline berjalan otomatis setiap hari jam 18:00 WIB (11:00 UTC). Monitor engagement, cek log di GitHub Actions, pastikan tidak ada error selama periode warmup (hingga ~29 Mei).</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-warn">WARMUP</span></div>
   </div>
 
   <div class="item">
     <div class="item-icon">🚀</div>
     <div class="item-body">
       <div class="item-title">Go-Live — <code>dry_run=False</code></div>
-      <div class="item-desc">Setelah 2 minggu warmup (~29 Mei), ubah <code>dry_run=True</code> → <code>dry_run=False</code> di <code>core/pipeline.py</code> baris 206 dan push ke GitHub.</div>
+      <div class="item-desc">Setelah warmup ~29 Mei, ubah <code>dry_run=True</code> → <code>dry_run=False</code> di <code>core/pipeline.py</code> dan push. Pipeline langsung posting ke Instagram secara otomatis.</div>
     </div>
     <div class="item-badge"><span class="badge badge-skip">29 MEI</span></div>
+  </div>
+</div>
+
+<!-- ROADMAP PENGEMBANGAN -->
+<div class="section">
+  <h2>🗺️ Roadmap Pengembangan</h2>
+
+  <div class="item">
+    <div class="item-icon">✏️</div>
+    <div class="item-body">
+      <div class="item-title">Topic Override dari Bot</div>
+      <div class="item-desc">Kirim topik spesifik langsung dari Telegram: <code>/post AI vibe coding dengan opencode</code>. Edit 3 file: <code>index.js</code> (parse topic), <code>autogram.yml</code> (env <code>TOPIC_OVERRIDE</code>), <code>pipeline.py</code> (baca env). ~10 baris kode.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">SEGERA</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">📊</div>
+    <div class="item-body">
+      <div class="item-title">Command <code>/stats</code> di Bot</div>
+      <div class="item-desc">Ringkasan langsung dari Telegram: total post, avg QA score, niche terpopuler, post terakhir. Query dari <code>autogram.db</code> via Cloudflare Worker.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">SEGERA</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🌐</div>
+    <div class="item-body">
+      <div class="item-title">Web Dashboard — Vercel</div>
+      <div class="item-desc">Antarmuka web untuk monitoring dan kontrol pipeline. Nilai tambah utama: visualisasi data (tabel history, chart QA score, performa per niche), trigger run manual lewat browser, bisa dibagikan tanpa akses Telegram. Stack: Next.js + Vercel (gratis). Telegram tetap untuk quick action, dashboard untuk analisis.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-next">PLANNED</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">📈</div>
+    <div class="item-body">
+      <div class="item-title">Engagement Tracker</div>
+      <div class="item-desc">Catat likes, comments, reach per post ke <code>autogram.db</code>. Analisis niche mana yang perform terbaik. Data ini jadi input untuk trend engine agar otomatis prioritaskan konten yang tinggi engagement-nya.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-skip">ROADMAP</span></div>
+  </div>
+
+  <div class="item">
+    <div class="item-icon">🔁</div>
+    <div class="item-body">
+      <div class="item-title">Natural Posting Time Variance</div>
+      <div class="item-desc">Variasi waktu posting ±15–30 menit dari jadwal secara random. Algoritma Instagram lebih menyukai pola posting yang organik/natural dibanding interval yang terlalu presisi.</div>
+    </div>
+    <div class="item-badge"><span class="badge badge-skip">ROADMAP</span></div>
   </div>
 </div>
 
@@ -599,9 +713,9 @@
     &nbsp;&nbsp;<span class="file-cfg done">├── config.yaml</span><br>
     &nbsp;&nbsp;<span class="file-env done">└── .env</span> <span style="color:var(--accent4); font-size:11px;">← tambah GROQ_API_KEY</span><br>
     <br>
-    <span class="folder" style="color:var(--accent2)">oracle-vm/</span> <span style="color:var(--muted)">(belum disetup)</span><br>
-    &nbsp;&nbsp;<span style="color:var(--muted)">├── autogram/</span> <span style="color:var(--muted); font-size:11px;">← clone repo ke sini</span><br>
-    &nbsp;&nbsp;<span style="color:var(--muted)">└── autogram.service</span> <span style="color:var(--muted); font-size:11px;">← systemd service</span>
+    <span class="folder" style="color:var(--accent2)">autogram-worker/</span> <span style="color:var(--ok); font-size:11px;">← Cloudflare Worker (deployed ✓)</span><br>
+    &nbsp;&nbsp;<span style="color:var(--accent)">├── src/index.js</span> <span style="color:var(--ok); font-size:11px;">✓</span><br>
+    &nbsp;&nbsp;<span style="color:var(--accent2)">└── wrangler.toml</span> <span style="color:var(--ok); font-size:11px;">✓</span>
   </div>
 </div>
 
@@ -610,18 +724,18 @@
   <h2>📌 Catatan Penting</h2>
 
   <div class="note note-ok">
-    ✅ <strong>Pipeline sudah live di GitHub Actions!</strong><br>
-    Jalan otomatis setiap 2 hari. Trigger manual kapanpun dari <code>github.com/himawaninsta01/autogram/actions</code>.
+    ✅ <strong>End-to-end pipeline 100% confirmed!</strong><br>
+    Bot Telegram → Cloudflare Worker → GitHub Actions → Content/Visual/QA → Notifikasi. Semua berjalan tanpa PC menyala. Pipeline #3 &amp; #4 sukses via <code>repository_dispatch</code>.
+  </div>
+
+  <div class="note note-warn">
+    📱 <strong>Warmup mode aktif — 14 hari (s/d ~29 Mei)</strong><br>
+    <code>dry_run=True</code> — pipeline generate konten tapi belum posting ke Instagram. Biarkan berjalan otomatis, monitor di GitHub Actions.
   </div>
 
   <div class="note note-info">
     💡 <strong>Go-live ~29 Mei:</strong><br>
-    Edit <code>core/pipeline.py</code> baris 206 → ubah <code>dry_run=True</code> menjadi <code>dry_run=False</code> → push ke GitHub. Selesai.
-  </div>
-
-  <div class="note note-warn">
-    ⚠️ <strong>Selanjutnya: Telegram Bot UI</strong><br>
-    Tambah <code>core/bot.py</code> untuk kontrol niche via Telegram. User bisa ketik /post AI atau /post crypto sebelum pipeline jalan.
+    Edit <code>core/pipeline.py</code> → ubah <code>dry_run=True</code> menjadi <code>dry_run=False</code> → push ke GitHub. Selesai.
   </div>
 </div>
 

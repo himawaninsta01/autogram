@@ -2,8 +2,8 @@ name: AutoGram Pipeline
 
 on:
   schedule:
-    # Setiap 2 hari sekali, jam 08:00 WIB (01:00 UTC)
-    - cron: '0 1 */2 * *'
+     # Setiap hari sekali, jam 18:00 WIB (11:00 UTC)
+    - cron: '0 11 * * *'  # Runs at 11:00 UTC
   workflow_dispatch:  # Bisa dijalankan manual dari GitHub
   repository_dispatch:
     types: [manual_run]  # Trigger dari Telegram Bot via Cloudflare Worker
@@ -36,4 +36,6 @@ jobs:
           IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
           IG_SESSION: ${{ secrets.IG_SESSION }}
           NICHE_OVERRIDE: ${{ github.event.client_payload.niche }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python -m core.pipeline
